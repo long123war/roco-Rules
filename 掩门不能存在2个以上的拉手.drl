@@ -1,0 +1,43 @@
+rule "掩门不能存在2个以上的拉手"
+when
+    $m : FParamModel(
+        brandGood.transProdCatId!=null && 
+        brandGood.transProdCatId == 713 && 
+        brandGood.brandGoodName.indexOf("锁组合") == -1 && 
+        brandGood.brandGoodName.indexOf("翻门支撑五金") == -1 &&
+        brandGood.brandGoodName.indexOf("门铰") == -1 &&
+        brandGood.brandGoodName.indexOf("门")!=-1
+        )
+then
+    // _result.getList().add(createParamModelResult($m.getName()+"门",$m));
+    int count=0;
+    boolean flag = false;
+    // 循环门板前面的模型
+    for (FCustomModel element:findModel($m, BaseDirect.Y_NEGATIVE, _modelTree)){
+        // _result.getList().add(createParamModelResult("拉手"+rangeMaxLimitDistance($m, element, BaseDirect.Z_POSITIVE,BaseDirect.Y_NEGATIVE),element));
+        try{
+            // 过滤所有的拉手
+            if(element.getBrandGood().getTransProdCatId()!=null && element.getBrandGood().getTransProdCatId()==441){
+                // _result.getList().add(createParamModelResult(element.getName()+"拉手",element));
+                // _result.getList().add(createParamModelResult(rangeMaxLimitDistance($m, element, BaseDirect.Z_POSITIVE,BaseDirect.Y_NEGATIVE)+"拉手",$m));
+                // if(element.getName().equals("无拉手")){
+                //     count++;
+                // }
+                if(rangeMaxLimitDistance($m, element, BaseDirect.Z_POSITIVE,BaseDirect.Y_NEGATIVE)>=0 && rangeMaxLimitDistance($m, element, BaseDirect.Z_POSITIVE,BaseDirect.Y_NEGATIVE)<=25){
+                    // _result.getList().add(createParamModelResult(rangeMaxLimitDistance($m, element, BaseDirect.Z_POSITIVE,BaseDirect.Y_NEGATIVE)+"拉手"+element.getName(),$m));
+                    count++;
+                    if(count>1){
+                        flag=true;
+                    }
+                }
+                
+            }
+        }catch (Exception e) { 
+            _result.getList().add(createParamModelResult("【"+$m.getName()+$m.getParent().getId()+"】模型执行bg信息获取检测异常" + element.getId(),$m));
+        }
+
+    }
+    if(flag==true){
+        _result.getList().add(createParamModelResult($m.getName()+"只能有1个拉手",$m));
+    }
+end

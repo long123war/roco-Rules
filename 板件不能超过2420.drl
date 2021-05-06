@@ -1,0 +1,131 @@
+// 此规则排除
+// 脚线盒
+// 顶线
+// 顶封板
+rule "板件高度不能超过2420mm"
+when
+    $m: FParamModel(
+        (brandGood.transProdCatId == 713 && !brandGood.brandGoodName.contains("顶线") && !brandGood.brandGoodName.contains("顶封板") && !brandGood.brandGoodName.contains("脚线盒")) || 
+        brandGood.transProdCatId == 785 || 
+        brandGood.transProdCatId == 2053 || 
+        brandGood.transProdCatId == 2054 || 
+        brandGood.transProdCatId == 2055 || 
+        brandGood.transProdCatId == 2056 || 
+        brandGood.transProdCatId == 2057 || 
+        brandGood.transProdCatId == 2059
+    )
+    // T、D是上下延伸
+    $p3: FParameter(name == "H") from $m.getAllParameter()
+    $p3Yst: FParameter(name == "YS_T") from $m.getAllParameter()
+    $p3Ysd: FParameter(name == "YS_D") from $m.getAllParameter()
+then
+    float totalH = Float.parseFloat($p3.getValue()) + Float.parseFloat($p3Yst.getValue()) + Float.parseFloat($p3Ysd.getValue());
+    if( totalH > 2420){
+        _result.getList().add(createParamModelResult( "板件尺寸H = " + totalH + "超过工艺最大范围", $m));
+    }
+end
+
+rule "板件深度不能超过2420mm"
+when
+    $d: FParamModel(
+        (brandGood.transProdCatId == 713 && !brandGood.brandGoodName.contains("顶线") && !brandGood.brandGoodName.contains("顶封板") && !brandGood.brandGoodName.contains("脚线盒")) || 
+        brandGood.transProdCatId == 785 || 
+        brandGood.transProdCatId == 2053 || 
+        brandGood.transProdCatId == 2054 || 
+        brandGood.transProdCatId == 2055 || 
+        brandGood.transProdCatId == 2056 || 
+        brandGood.transProdCatId == 2057 || 
+        brandGood.transProdCatId == 2059
+    )
+    // F、B是前后延伸
+    $p2: FParameter(name == "D") from $d.getAllParameter()
+    $p2Ysf: FParameter(name == "YS_F") from $d.getAllParameter()
+    $p2Ysb: FParameter(name == "YS_B") from $d.getAllParameter()
+
+then
+    
+    float totalD = Float.parseFloat($p2.getValue()) + Float.parseFloat($p2Ysf.getValue()) + Float.parseFloat($p2Ysb.getValue());
+    if( totalD > 2420){
+        _result.getList().add(createParamModelResult( "板件尺寸D = " + totalD + "超过工艺最大范围", $d));
+    }
+end
+
+rule "板件宽度不能超过2420mm"
+when
+    $w: FParamModel(
+        (brandGood.transProdCatId == 713 && 
+        !brandGood.brandGoodName.contains("顶线") && 
+        !brandGood.brandGoodName.contains("顶封板") && 
+        !brandGood.brandGoodName.contains("脚线盒") &&
+        brandGood.brandGoodName.indexOf("装饰板") == -1
+        ) || 
+        brandGood.transProdCatId == 785 || 
+        brandGood.transProdCatId == 2053 || 
+        brandGood.transProdCatId == 2054 || 
+        brandGood.transProdCatId == 2055 || 
+        brandGood.transProdCatId == 2056 || 
+        brandGood.transProdCatId == 2057 || 
+        brandGood.transProdCatId == 2059
+    )
+    // L、R是左右延伸
+    $p1: FParameter(name == "W") from $w.getAllParameter()
+    $p1Ysl: FParameter(name == "YS_L") from $w.getAllParameter()
+    $p1Ysr: FParameter(name == "YS_R") from $w.getAllParameter()
+
+then
+    float totalW = Float.parseFloat($p1.getValue()) + Float.parseFloat($p1Ysl.getValue()) + Float.parseFloat($p1Ysr.getValue());
+    // _result.getList().add(createParamModelResult( "板件尺寸W = "+$w.getName(), $w));
+    if( totalW > 2420){
+        _result.getList().add(createParamModelResult( "板件尺寸W = " + totalW + "超过工艺最大范围", $w));
+    }
+
+    
+end
+
+// 针对顶线、脚线盒等特殊对接部件。直接由底层板件改变尺寸，而不是延伸
+rule "无延伸值板件尺寸不能超过2420"
+when
+    $w: FParamModel(
+        (brandGood.transProdCatId == 713 && 
+        brandGood.brandGoodName.indexOf("门") == -1 && 
+        brandGood.brandGoodName.indexOf("罗马柱") == -1 && 
+        brandGood.brandGoodName.indexOf("装饰板") == -1 && 
+        brandGood.brandGoodName.indexOf("收口条") == -1 && 
+        brandGood.brandGoodName.indexOf("护墙") == -1 && 
+        brandGood.brandGoodName.indexOf("拉手") == -1 && 
+        brandGood.brandGoodName.indexOf("脚线盒") == -1 && 
+        brandGood.brandGoodName.indexOf("报价") == -1 && 
+        brandGood.brandGoodName.indexOf("价格") == -1) || 
+        brandGood.transProdCatId == 785 || 
+        brandGood.transProdCatId == 2053 || 
+        brandGood.transProdCatId == 2054 || 
+        (brandGood.transProdCatId == 2055 && 
+        brandGood.brandGoodName.indexOf("导轨") == -1) || 
+        brandGood.transProdCatId == 2056 || 
+        brandGood.transProdCatId == 2057 || 
+        brandGood.transProdCatId == 2059
+    )
+    // L、R是左右延伸
+    $pW: FParameter(name == "W") from $w.getAllParameter()
+    $pD: FParameter(name == "D") from $w.getAllParameter()
+    $pH: FParameter(name == "H") from $w.getAllParameter()
+
+then
+// _result.getList().add(createParamModelResult( "板件尺寸W =  ", $w));
+    if($w.getParent().getName().indexOf("虚拟") == -1 && 
+    $w.getParent().getName().indexOf("装饰板") == -1
+    ){
+        if( Float.parseFloat($pW.getValue()) > 2420){
+            _result.getList().add(createParamModelResult( "板件尺寸W = " + $pW.getValue() + "超过工艺最大范围", $w));
+        }
+        if( Float.parseFloat($pD.getValue()) > 2420){
+            _result.getList().add(createParamModelResult( "板件尺寸W = " + $pD.getValue() + "超过工艺最大范围", $w));
+        }
+        if( Float.parseFloat($pH.getValue()) > 2420){
+            _result.getList().add(createParamModelResult( "板件尺寸W = " + $pH.getValue() + "超过工艺最大范围", $w));
+        }
+    }
+    
+
+    
+end

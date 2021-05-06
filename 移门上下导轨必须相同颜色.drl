@@ -1,0 +1,19 @@
+rule "移门上下导轨必须相同颜色"
+when
+// 获取上下导轨对象
+    $m1: FParamModel(brandGood.brandGoodCode == "YM_T_DG")
+    $m2: FParamModel(brandGood.brandGoodCode == "YM_B_DG")
+    $bg1: FBrandGood() from getParameterBrandGoods($m1,"material")
+    $bg2: FBrandGood() from getParameterBrandGoods($m2,"material")
+then
+    // _result.getList().add(createParamModelResult("上导轨颜色：",$m1));
+    if($bg1.getBrandGoodName()!=null && $bg2.getBrandGoodName()!=null && !$bg1.getBrandGoodName().equals($bg2.getBrandGoodName()) ){
+        _result.getList().add(createParamModelResult($m1.getName()+"和"+$m2.getName()+"。颜色不一致，请选择相同的颜色",$m1,$m2));
+    }
+    
+    // if(dS != "" && dX != "" && !dS.equals(dX)){
+    //     _result.getList().add(createParamModelResult("上导轨颜色："+dS+"。下导轨颜色："+dX,$m));
+    //     // _result.getList().add(createParamModelResult("上导轨颜色："+dS+"。下导轨颜色："+dX+"。上下导轨颜色必须统一，请选择相同的颜色！！！",$m));
+    // }
+
+end

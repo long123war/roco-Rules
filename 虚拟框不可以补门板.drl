@@ -1,0 +1,10 @@
+rule "虚拟框不可以补门板"
+when
+    // $m: FParamModel(name.indexOf("门") != -1)
+    $m: FParamModel(brandGood.transProdCatId == 498 && name.indexOf("门") != -1)
+then
+    if($m.getParent().getName().equals("虚拟框") || $m.getParent().getName().equals("自由柜")){
+
+    _result.getList().add(createParamModelResult($m.getParent().getName()+"不可以用作补门板，补门板请使用虚拟柜！！",$m));
+    }
+end 

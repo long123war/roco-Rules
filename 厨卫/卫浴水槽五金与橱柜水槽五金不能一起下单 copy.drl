@@ -1,0 +1,11 @@
+rule "卫浴水槽五金与橱柜水槽五金不能一起下单"
+when
+    $m : FCustomModel(brandGood.transProdCatId!=null && (brandGood.transProdCatId == 463 || brandGood.transProdCatId == 462) )
+    $m1 : FCustomModel(brandGood.transProdCatId!=null && (brandGood.transProdCatId == 463 || brandGood.transProdCatId == 462) )
+    $p : FParameter( name == "LKWY") from $m.getAllParameter()
+    $p1 : FParameter( name == "LKCG") from $m1.getAllParameter()
+    // eval($p.size() > 0 && $p1.size() > 0)
+then 
+    _result.getList().add(createParamModelResult("【卫浴水槽/龙头】："+$m.getName()+"不能与【橱柜水槽/龙头】混用",$m));
+    // _result.getList().add(createParamModelResult("橱柜水槽和卫浴水槽不能混用" + $m1.getName(),$m1));
+end

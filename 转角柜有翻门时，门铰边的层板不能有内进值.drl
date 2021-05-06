@@ -1,0 +1,29 @@
+rule "转角柜有翻门时，门铰边的层板不能有内进值"
+when
+    $m: FParamModel(brandGood.transProdCatId == 498 && name.indexOf("翻门") != -1)
+    // $root: FCustomModel() from $m.getRoot()
+then
+// 父模型是转角柜
+    if($m.getRoot().getName()!=null && $m.getRoot().getName().indexOf("转角")!=-1){
+        // 遍历模型Y轴负方向的所有模型
+        for(FCustomModel paramModel: findModel($m, BaseDirect.Y_NEGATIVE, _modelTree)){
+            // 过滤板件
+            if(paramModel.getName()!=null &&
+             ((paramModel.getName().indexOf("层板")!=-1 && paramModel.getName().indexOf("转角")!=-1) ||
+             paramModel.getName().indexOf("顶板")!=-1 ||
+             paramModel.getName().indexOf("底板")!=-1 ||
+             paramModel.getName().indexOf("底座")!=-1)
+             ){
+                //  _result.getList().add(createParamModelResult(paramModel.getName()+"名称",paramModel));
+                for (FParameter param: paramModel.getAllParameter()){
+                    // 层板的NS_F变量必须为1，否则报错
+                    if(param.getName().equals("NS_F") && Float.parseFloat(param.getValue())!=0 ){
+                        _result.getList().add(createParamModelResult(paramModel.getName()+"的内进值必须设置为0",paramModel));
+                    }
+                }
+            }
+        }
+        // _result.getList().add(createParamModelResult("test:"+$m.getName(),$m));
+    }
+
+end

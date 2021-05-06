@@ -1,0 +1,39 @@
+rule "卫浴水槽只能用在卫浴模块中"
+when
+// 找水槽和龙头
+    $m : FCustomModel(brandGood.transProdCatId != null && (brandGood.transProdCatId == 463 || brandGood.transProdCatId == 462) )
+    $p : FParameter( name == "LKWY") from $m.getAllParameter()
+    $root: FParamModel() from $m.getRoot()
+then
+    boolean flag = false;
+    // 如果祖先模型有LKWY变量，证明是卫浴的
+    for (FParameter param: $root.getAllParameter()){
+        if(param.getName().equals("LKWY")){
+            flag = true;
+        }
+    }
+    if(flag == false){
+        _result.getList().add(createParamModelResult($m.getName() + "属于卫浴，不能跟卫浴以外的模块混合用！！！", $m));
+    }
+
+end
+
+rule "橱柜水槽只能用在橱柜模块中"
+when
+// 找水槽和龙头
+    $m : FCustomModel(brandGood.transProdCatId != null &&  (brandGood.transProdCatId == 463 || brandGood.transProdCatId == 462) )
+    $p : FParameter( name == "LKCG") from $m.getAllParameter()
+    $root: FParamModel() from $m.getRoot()
+then
+    boolean flag = true;
+    // 如果祖先模型有LKCG变量，证明是卫浴的
+    for (FParameter param: $root.getAllParameter()){
+        if(param.getName().equals("LKWY")){
+            flag = false;
+        }
+    }
+    if(flag == false){
+        _result.getList().add(createParamModelResult($m.getName() + "属于橱柜，不能跟橱柜以外的模块混合用！！！", $m));
+    }
+
+end

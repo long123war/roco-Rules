@@ -1,0 +1,17 @@
+rule "榻榻米内部只能使用榻榻米板件"
+when
+    $m: FParamModel(parent == null)
+    $sub: FParamModel(deleted==false && ignore==false && brandGood.brandGoodName!=null) from $m.getSubModels()
+then 
+// 在榻榻米和封板柜体里面，只能放名称包含“榻榻米”和“1中侧板”的部件
+if($m.getBrandGood().getTransProdCatId() == 725 && $m.getBrandGood().getBrandGoodName().indexOf("封板")==-1 && $m.getBrandGood().getBrandGoodName()!=null){
+    if($sub.getBrandGood().getBrandGoodName().indexOf("榻榻米")==-1 && $sub.getBrandGood().getBrandGoodName().indexOf("1中侧板")==-1){
+        _result.getList().add(createParamModelResult("模型:【" + $sub.getName() + "】, 应替换为“榻榻米部件”类目下的模型" ,$sub));
+    }
+    // 榻榻米部件只能放在榻榻米柜体或者虚拟柜里面。否则报错
+}else if($m.getBrandGood().getTransProdCatId() != 725 && $m.getBrandGood().getBrandGoodName().indexOf("虚拟")==-1 && $m.getBrandGood().getBrandGoodName()!=null){
+    if($sub.getBrandGood().getBrandGoodName().indexOf("榻榻米")!=-1){
+        _result.getList().add(createParamModelResult("模型:【" + $sub.getName() + "】错误!不能使用榻榻米专用部件" ,$sub));
+    }
+}
+end

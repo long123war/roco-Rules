@@ -1,0 +1,69 @@
+rule "柜身花色不可同时存在清新板和颗粒板"
+when
+//list数组： 名称不为空 并且名字不含“门”字 并且真分类不是板件的对象
+    // $list: List() from collect(FParamModel
+    //     (
+    //         brandGood.brandGoodName!=null && 
+    //         (brandGood.description.substring(0,2).equals("00") || 
+    //         brandGood.description.substring(0,2).equals("07") || 
+    //         brandGood.description.substring(0,2).equals("08"))
+    //     )
+    // )
+    $list: List() from collect(FParamModel(brandGood.brandGoodName!=null && brandGood.brandGoodName.indexOf("虚拟") == -1  && brandGood.brandGoodName.indexOf("装饰盒") == -1 && brandGood.brandGoodName.indexOf("门") == -1 && (brandGood.transProdCatId == 713 || brandGood.transProdCatId == 785 || brandGood.transProdCatId == 2053 || brandGood.transProdCatId == 2054 || brandGood.transProdCatId == 2055 || brandGood.transProdCatId == 2056 || brandGood.transProdCatId == 2057 || brandGood.transProdCatId == 2059 || brandGood.transProdCatId == 688)))
+    // list数组的数量大于1
+    eval($list.size()>1)
+then
+// 遍历list数组，获得所有变量值，把变量值加入newList数组
+        List<FParamModel> newList = new ArrayList();
+        boolean flag = false;
+        boolean flag2 = false;
+        for(Object parammodel: $list){
+                
+            ObjectMapper objectMapper = new ObjectMapper();
+            FParamModel newParammodel = objectMapper.convertValue(parammodel, FParamModel.class);
+            for (FParameter param: newParammodel.getAllParameter()) {
+                newList.add(newParammodel);
+            }
+            
+
+     }
+    //  遍历newList数组，看有无018基材（清新板）
+     for (FParamModel parammodel: newList) {
+        // 只检索描述00（板件），07（异形板），08（台面）
+        // _result.getList().add(createParamModelResult("测试："+parammodel.getBrandGood().getDescription().substring(0,2),parammodel));
+        // 现在无法获取隐藏的材质，暂停
+        for(FBrandGood bg:  getParameterBrandGoods(parammodel,"material")){
+        // 如果有018基材flag=true
+        // _result.getList().add(createParamModelResult("基材："+bg.getBaseTexture(),parammodel));            
+            if (bg.getBaseTexture().indexOf("018")!=-1) {
+                // _result.getList().add(createParamModelResult("清新："+bg.getBaseTexture(),parammodel));
+                flag=true;
+            }
+            if (bg.getBaseTexture().indexOf("012")!=-1) {
+                // _result.getList().add(createParamModelResult("颗粒："+bg2.getBaseTexture(),parammodel));
+                flag2=true;
+            }
+        }
+        // _result.getList().add(createParamModelResult("test"+flag+flag2,parammodel));
+        
+        if (flag && flag2) {
+            _result.getList().add(createParamModelResult("在整个方案中柜身板材不可同时存在清新板和颗粒板，请把所有柜身修改为统一材质！",parammodel));
+            break;
+        }
+        
+    }
+
+
+    // 检测空间有018基材之后，再检测是否有012基材（颗粒板）
+//     if (flag) {
+//         for(FParamModel parammodel: newList){
+//            for(FBrandGood bg:  getParameterBrandGoods(parammodel,"material")){
+//             if (bg.getBaseTexture().indexOf("012")!=-1) {
+//                 _result.getList().add(createParamModelResult("在整个方案中柜身板材不可同时存在清新板和颗粒板，请把所有柜身修改为统一材质！",parammodel));
+//                 return;
+//             }
+//         } 
+//     }
+// }
+
+end

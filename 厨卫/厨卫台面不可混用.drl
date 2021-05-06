@@ -1,0 +1,45 @@
+rule "厨卫台面不可混用"
+when
+    $m: FParamModel(parent==null)
+    $bg: FBrandGood() from getParameterBrandGoods($m,"shape")
+    $list : List() from collect(FParamModel(brandGood.brandGoodName!=null && parent == null))
+then
+    boolean flag = false;
+    boolean flag2 = false;
+    // 如果有卫浴台面边型flag==true
+    if($bg.getCustomCode()!=null && $bg.getCustomCode().equals("LKWY")){
+        flag = true;
+    }
+    // 如果有橱柜台面边型flag2==true
+    if($bg.getCustomCode()!=null && $bg.getCustomCode().equals("CGTMZS")){
+        flag2 = true;
+    }
+
+    List<FParamModel> newList = new ArrayList();
+    // 遍历list，把含有LKWY变量的模块拿出来组成一个新数组。
+    for(Object parammodel: $list){
+        ObjectMapper objectMapper = new ObjectMapper();
+        FParamModel newParammodel = objectMapper.convertValue(parammodel, FParamModel.class);
+        for (FParameter param: newParammodel.getAllParameter()) {
+            // 把哈有LKWY的模块加入新数组newList
+            if (param.getName().equals("LKWY")) {
+                newList.add(newParammodel);
+            }
+        }
+    }
+    // 有卫浴台面边型，报错
+    if(flag == true){
+        // 如果没有卫浴的模块
+        if(newList.size() == 0){
+            _result.getList().add(createParamModelResult("卫浴的台面必须搭配卫浴模块使用",$m));
+        }
+    }
+    // 有橱柜台面边型
+    if(flag2 == true){
+        // 如果没卫浴的模块
+        if(newList.size() != 0){
+            _result.getList().add(createParamModelResult("橱柜的台面必须搭配橱柜模块使用",$m));
+        }
+    }
+
+end

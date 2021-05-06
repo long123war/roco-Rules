@@ -1,0 +1,47 @@
+rule "9mm背板基材不一致"
+when
+    $list: List() from collect(FParamModel(brandGood.brandGoodName!=null && (brandGood.brandGoodName.indexOf("背板") != -1||brandGood.transProdCatId == 785)))
+    eval($list.size()>1)
+then
+        List<FParamModel> newList = new ArrayList();
+        boolean flag = false;
+        for(Object parammodel: $list){
+            ObjectMapper objectMapper = new ObjectMapper();
+            FParamModel newParammodel = objectMapper.convertValue(parammodel, FParamModel.class);
+            for (FParameter param: newParammodel.getAllParameter()) {
+                if (param.getName().equals("BT") && param.getParsedValue(Integer.class)==9) {
+                    newList.add(newParammodel);
+                    //_result.getList().add(createParamModelResult("9mm背板基材list-bt："+newList.toString(),newParammodel));
+                }
+                if (param.getName().equals("D") ) {
+                    if (FloatUtil.isEqual(param.getParsedValue(Float.class), 9, 0.5f)) {
+                        newList.add(newParammodel);
+                    }
+                }  
+            }
+     }
+     for (FParamModel parammodel: newList) {
+        for(FBrandGood bg:  getParameterBrandGoods(parammodel,"material")){
+                if (bg.getBaseTexture().indexOf("023")!=-1) {
+                        flag=true;
+                        break;
+                }
+            }
+            if (flag) {
+                break;
+            }
+     }
+
+
+
+    if (flag) {
+        for(FParamModel parammodel: newList){
+           for(FBrandGood bg:  getParameterBrandGoods(parammodel,"material")){
+            if (bg.getBaseTexture().indexOf("012")!=-1) {
+                _result.getList().add(createParamModelResult("9mm背板基材核查：【"+parammodel.getName() +"】"+"基材不一致",parammodel));
+            }
+        } 
+    }
+}
+
+end

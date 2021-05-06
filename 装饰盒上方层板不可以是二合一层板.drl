@@ -1,0 +1,27 @@
+rule "装饰盒上方层板不可以是二合一层板"
+when
+    // $list: List() from collect(FParamModel(brandGood.brandGoodName!=null && brandGood.brandGoodName.contains("装饰盒")))
+    $m: FParamModel(brandGood.brandGoodName.contains("装饰盒"))
+    // $b: FCustomModel(brandGood.brandGoodName.contains("二合一")) from findModel($m, BaseDirect.Z_POSITIVE, _modelTree)
+    // eval(rangeMaxLimitDistance($b, $m, BaseDirect.Y_POSITIVE,BaseDirect.Z_POSITIVE)>18 && rangeMaxLimitDistance($b, $m, BaseDirect.Y_POSITIVE,BaseDirect.Z_POSITIVE)<28)
+    // eval($list.size()>1)
+then
+// 查看每一个装饰盒上方是否二合一层板，如果有则报错提示。
+    for(FCustomModel paramModel: findModel($m, BaseDirect.Z_POSITIVE, _modelTree)){
+        // _result.getList().add(createParamModelResult("所有装饰盒上方的", paramModel));
+        if(paramModel.getBrandGood().getBrandGoodName()!=null && paramModel.getBrandGood().getBrandGoodName().contains("二合一")){
+            // _result.getList().add(createParamModelResult("装饰盒上方二合一:", paramModel));
+            // _result.getList().add(createParamModelResult("所有装饰盒:", $m));
+            if(rangeMaxLimitDistance($m, paramModel, BaseDirect.Z_POSITIVE,BaseDirect.X_POSITIVE)<2){
+                
+                if(rangeMaxLimitDistance($m, paramModel, BaseDirect.Y_POSITIVE,BaseDirect.Z_POSITIVE)>17&&rangeMaxLimitDistance($m, paramModel, BaseDirect.Y_POSITIVE,BaseDirect.Z_POSITIVE)<28){
+                    // _result.getList().add(createParamModelResult("装饰盒上方二合一:", paramModel));
+                    // _result.getList().add(createParamModelResult("所有装饰盒:", $m));
+                    _result.getList().add(createParamModelResult("装饰盒上方不可以有: " + paramModel.getName() + "距离：" + rangeMaxLimitDistance($m, paramModel, BaseDirect.Y_POSITIVE,BaseDirect.Z_POSITIVE), paramModel));
+                }  
+            }
+             
+        }
+    }
+    // _result.getList().add(createParamModelResult("装饰盒上方不可以有:", $m));
+end

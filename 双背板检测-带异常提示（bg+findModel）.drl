@@ -1,0 +1,119 @@
+rule "双背板报错-方案3"
+when
+    $m1: FParamModel(parent == null && brandGood.brandGoodName.indexOf("楼梯柜") == -1)
+    $m:FParamModel((brandGood.transProdCatId == 785 || brandGood.brandGoodName.indexOf("背板") != -1) && ignore==false)from $m1.getSubModels()
+then
+    int count=0;
+    boolean flag = false;
+    try{
+        // 模型是正方向，检测Y轴正方向
+        if($m.getRotateDegree().z==0){
+            for (FCustomModel element:findModel($m, BaseDirect.Y_POSITIVE, _modelTree)){
+                try{
+                    if(element.getBrandGoodId()!=null && 
+                    (element.getBrandGood().getBrandGoodName().indexOf("背板")!= -1 || element.getBrandGood().getTransProdCatId()==785) &&
+                    ($m.getRotateDegree().z-element.getRotateDegree().z<5&&$m.getRotateDegree().z-element.getRotateDegree().z>-5) &&
+                    ($m1.getId()==element.getRootOrMainModel().getId()) &&
+                    element.getIgnore()==false &&
+                    $m.getRotateDegree().z == element.getRotateDegree().z &&
+                    rangeMaxLimitDistance($m, element, BaseDirect.Z_POSITIVE,BaseDirect.Y_POSITIVE)<=20
+                    ){
+                        // _result.getList().add(createParamModelResult("【"+$m.getRotateDegree().z,$m));
+                        // _result.getList().add(createParamModelResult("【"+element.getRotateDegree().z,element));
+                            // _result.getList().add(createParamModelResult("【"+element.getName()+"】"+$m.getRotateDegree().z+"|"+element.getRotateDegree().z+"|",element));
+                            count++;
+                            if(count>0){
+                                flag=true;
+                            }
+                        }
+                }catch (Exception e) { 
+                    _result.getList().add(createParamModelResult("【"+$m.getName()+$m.getParent().getId()+"】模型执行bg信息获取检测异常" + element.getId(),$m));
+                }
+
+            }
+        }
+        // 模型是旋转-90度，检测X轴正方向
+        if($m.getRotateDegree().z==-90 || $m.getRotateDegree().z==270){
+            for (FCustomModel element:findModel($m, BaseDirect.X_POSITIVE, _modelTree)){
+                try{
+                    if(element.getBrandGoodId()!=null && 
+                    (element.getBrandGood().getBrandGoodName().indexOf("背板")!= -1 || element.getBrandGood().getTransProdCatId()==785) &&
+                    ($m.getRotateDegree().z-element.getRotateDegree().z<5&&$m.getRotateDegree().z-element.getRotateDegree().z>-5) &&
+                    ($m1.getId()==element.getRootOrMainModel().getId()) &&
+                    element.getIgnore()==false &&
+                    $m.getRotateDegree().z == element.getRotateDegree().z &&
+                    rangeMaxLimitDistance($m, element, BaseDirect.Z_POSITIVE,BaseDirect.X_POSITIVE)<=20
+                    ){
+                        // _result.getList().add(createParamModelResult("【"+$m.getRotateDegree().z,$m));
+                        // _result.getList().add(createParamModelResult("【"+element.getRotateDegree().z,element));
+                            // _result.getList().add(createParamModelResult("【"+element.getName()+"】"+$m.getRotateDegree().z+"|"+element.getRotateDegree().z+"|",element));
+                            count++;
+                            if(count>0){
+                                flag=true;
+                            }
+                        }
+                }catch (Exception e) { 
+                    _result.getList().add(createParamModelResult("【"+$m.getName()+$m.getParent().getId()+"】模型执行bg信息获取检测异常" + element.getId(),$m));
+                }
+
+            }
+        }
+        // 模型是旋转-180度，检测Y轴负方向
+        if($m.getRotateDegree().z==-180  || $m.getRotateDegree().z==180){
+            for (FCustomModel element:findModel($m, BaseDirect.Y_NEGATIVE, _modelTree)){
+                try{
+                    if(element.getBrandGoodId()!=null && 
+                    (element.getBrandGood().getBrandGoodName().indexOf("背板")!= -1 || element.getBrandGood().getTransProdCatId()==785) &&
+                    ($m.getRotateDegree().z-element.getRotateDegree().z<5&&$m.getRotateDegree().z-element.getRotateDegree().z>-5) &&
+                    ($m1.getId()==element.getRootOrMainModel().getId()) &&
+                    element.getIgnore()==false &&
+                    $m.getRotateDegree().z == element.getRotateDegree().z &&
+                    rangeMaxLimitDistance($m, element, BaseDirect.Z_POSITIVE,BaseDirect.Y_NEGATIVE)<=20
+                    ){
+                        // _result.getList().add(createParamModelResult("【"+$m.getRotateDegree().z,$m));
+                        // _result.getList().add(createParamModelResult("【"+element.getRotateDegree().z,element));
+                            // _result.getList().add(createParamModelResult("【"+element.getName()+"】"+$m.getRotateDegree().z+"|"+element.getRotateDegree().z+"|",element));
+                            count++;
+                            if(count>0){
+                                flag=true;
+                            }
+                        }
+                }catch (Exception e) { 
+                    _result.getList().add(createParamModelResult("【"+$m.getName()+$m.getParent().getId()+"】模型执行bg信息获取检测异常" + element.getId(),$m));
+                }
+
+            }
+        }
+        // 模型是旋转-270度，检测X轴负方向
+        if($m.getRotateDegree().z==-270 || $m.getRotateDegree().z==90){
+            for (FCustomModel element:findModel($m, BaseDirect.X_NEGATIVE, _modelTree)){
+                try{
+                    if(element.getBrandGoodId()!=null && 
+                    (element.getBrandGood().getBrandGoodName().indexOf("背板")!= -1 || element.getBrandGood().getTransProdCatId()==785) &&
+                    ($m.getRotateDegree().z-element.getRotateDegree().z<5&&$m.getRotateDegree().z-element.getRotateDegree().z>-5) &&
+                    ($m1.getId()==element.getRootOrMainModel().getId()) &&
+                    element.getIgnore()==false &&
+                    $m.getRotateDegree().z == element.getRotateDegree().z &&
+                    rangeMaxLimitDistance($m, element, BaseDirect.Z_POSITIVE,BaseDirect.X_NEGATIVE)<=20
+                    ){
+                        // _result.getList().add(createParamModelResult("【"+$m.getRotateDegree().z,$m));
+                        // _result.getList().add(createParamModelResult("【"+element.getRotateDegree().z,element));
+                            // _result.getList().add(createParamModelResult("【"+element.getName()+"】"+$m.getRotateDegree().z+"|"+element.getRotateDegree().z+"|",element));
+                            count++;
+                            if(count>0){
+                                flag=true;
+                            }
+                        }
+                }catch (Exception e) { 
+                    _result.getList().add(createParamModelResult("【"+$m.getName()+$m.getParent().getId()+"】模型执行bg信息获取检测异常" + element.getId(),$m));
+                }
+
+            }
+        }
+    }catch (Exception e) {
+        _result.getList().add(createParamModelResult("【"+$m.getName()+$m.getParent().getId()+"】模型执行findModel检测异常",$m));
+    }
+    if(flag==true){
+        _result.getList().add(createParamModelResult("【"+$m.getName()+"】后面还有其他背板",$m));
+    }
+end

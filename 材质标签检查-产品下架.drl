@@ -1,0 +1,24 @@
+rule "模型/材质标签检查-产品下架-参数化模型"
+when
+    $m1:FParamModel(brandGood.brandGoodName!=null && brandGood.seriesTagName!=null && name.indexOf("顶层包裹")==-1)
+    $bg: FBrandGood() from getParameterBrandGoods($m1,"material")
+then
+// 参数化模型下架检测
+    if ($m1.getBrandGood().getSeriesTagName()!=null && $m1.getBrandGood().getSeriesTagName().equals("CPXJ")) {
+    	_result.getList().add(createParamModelResult("提示信息：模型=【"+$m1.getName() +"】产品已下架!",$m1));
+	}
+	if ($bg.getSeriesTagName()!=null && $bg.getSeriesTagName().equals("CPXJ")) {
+    	_result.getList().add(createParamModelResult("材质=【"+$bg.getBrandGoodName() + "】 是下架颜色 " + $bg.getSeriesTagName(), $m1));
+    }
+end
+
+rule "模型/材质标签检查-产品下架-3D模型"
+when
+    $m2:FCustomModel(brandGood.brandGoodName!=null && brandGood.seriesTagName!=null)
+then
+    // 3D模型下架检测
+    if ($m2.getBrandGood().getSeriesTagName()!=null && $m2.getBrandGood().getSeriesTagName().equals("CPXJ")) {
+    	_result.getList().add(createParamModelResult("提示信息：模型=【"+$m2.getName() +"】产品已下架!",$m2));
+	}
+
+end

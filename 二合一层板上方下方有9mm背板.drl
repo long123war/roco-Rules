@@ -1,0 +1,23 @@
+rule "二合一层板上方/下方有9mm背板-BT"
+when
+    $m1: FParamModel(brandGood.brandGoodName!=null && (brandGood.brandGoodName.indexOf("二合一") != -1||brandGood.transProdCatId == 2054))
+    $m2: FParamModel(brandGood.brandGoodName!=null && (brandGood.brandGoodName.indexOf("背板") != -1||brandGood.transProdCatId == 785)) from CollectionUtils.union(findModel($m1, BaseDirect.Z_POSITIVE, _modelTree), findModel($m1, BaseDirect.Z_NEGATIVE, _modelTree))
+    $p:  FParameter(Name == "BT") from $m2.getParameter()
+    $p1:  FParameter(Name == "CBFG") from $m1.getParameter()
+    eval($p1.getParsedValue(Integer.class)==0 &&$p.getParsedValue(Integer.class)==9 && sizeDistance($m1, $m2,BaseDirect.X_POSITIVE,BaseDirect.Z_POSITIVE)<1 && $m1.getParent().getId()==$m1.getRootOrMainModel().getId() && $m2.getParent().getId()==$m2.getRootOrMainModel().getId())
+then
+	_result.getList().add(createParamModelResult("设计错误：【"+$m1.getName() +"】"+"二合一固层不能用于分隔9mm背板-BT!"+$m1.getBrandGood().getProductNumber(),$m1));  
+    _result.getList().add(createParamModelResult("设计错误：柜体有倾斜，下单柜体必须为90的倍数！",$m1));
+end
+
+rule "二合一层板上方/下方有9mm背板-D"
+when
+    $m1: FParamModel(brandGood.brandGoodName!=null && (brandGood.brandGoodName.indexOf("二合一") != -1||brandGood.transProdCatId == 2054))
+    $m2: FParamModel(brandGood.brandGoodName!=null && (brandGood.brandGoodName.indexOf("背板") != -1||brandGood.transProdCatId == 785)) from CollectionUtils.union(findModel($m1, BaseDirect.Z_POSITIVE, _modelTree), findModel($m1, BaseDirect.Z_NEGATIVE, _modelTree))
+    $p2:  FParameter(Name == "D") from $m2.getParameter()
+    $p1:  FParameter(Name == "CBFG") from $m1.getParameter()
+    eval($p1.getParsedValue(Integer.class)==0 && $p2.getParsedValue(Float.class)==9 && sizeDistance($m1, $m2,BaseDirect.X_POSITIVE,BaseDirect.Z_POSITIVE)<1 && $m1.getParent().getId()==$m1.getRootOrMainModel().getId() && $m2.getParent().getId()==$m2.getRootOrMainModel().getId())
+then
+	_result.getList().add(createParamModelResult("设计错误：【"+$m1.getName() +"】"+"二合一固层不能用于分隔9mm背板-D!"+$m1.getBrandGood().getProductNumber(),$m1));  
+	_result.getList().add(createParamModelResult("设计错误：柜体有倾斜，下单柜体必须为90的倍数！",$m1));
+end

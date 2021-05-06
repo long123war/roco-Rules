@@ -1,0 +1,96 @@
+rule "天地门铰顶底板出孔检测"
+// 控制方案里无台面时不可以选粘盆费
+when
+    $list: List() from collect(FParamModel(name.indexOf("天地门铰") != -1 || name.indexOf("一字底座") != -1))
+then
+    List<FParamModel> newList = new ArrayList();
+    boolean flag = false;
+    for(Object parammodel: $list){
+        ObjectMapper objectMapper = new ObjectMapper();
+        FParamModel newParammodel = objectMapper.convertValue(parammodel, FParamModel.class);
+        for (FParameter param: newParammodel.getAllParameter()) {
+            // 筛选出有PJCC的板，就是天地门铰顶底板
+            if(param.getName().equals("PJCC")){
+                newList.add(newParammodel);
+            }
+            
+        }
+    }
+    // 遍历天地门铰顶底板
+    
+
+    for (FParamModel parammodel: newList) {
+        boolean flag1 = false;
+        boolean flag2 = false;
+        // 获得天地门铰顶底板前面的模型
+        for(FCustomModel paramBefore: findModel(parammodel, BaseDirect.Y_NEGATIVE, _modelTree)){
+            if(paramBefore.getBrandGood().getTransProdCatId() == 498 && 
+            paramBefore.getBrandGood().getBrandGoodName().contains("ML-4") &&
+            rangeMinLimitDistance(paramBefore, parammodel, BaseDirect.Z_POSITIVE,BaseDirect.Y_NEGATIVE)<30
+            ){
+                // _result.getList().add(createParamModelResult("天地门铰顶底板测试"+rangeMinLimitDistance(paramBefore, parammodel, BaseDirect.Z_POSITIVE,BaseDirect.Y_NEGATIVE), paramBefore));
+                // 天地顶底板前面的门板
+
+                for (FParameter men: paramBefore.getAllParameter()) {
+                    if(men.getName().equals("openDirection")){
+                        // 如果是左开门
+                        if(Float.parseFloat(men.getValue()) == 0){
+                            flag1 = true;
+                            
+                        }
+                        // 如果是右开门
+                        if(Float.parseFloat(men.getValue()) == 1){
+                            flag2 = true;
+                        }
+                    }
+                    
+                }
+            }
+        }
+
+        // 如果天地门铰前面是左开门
+        if(flag1 == true && flag2 == false){
+            // _result.getList().add(createParamModelResult("flag1"+flag1+"flag2"+flag2, parammodel));
+            // 看天地门铰板的PJCC变量
+            for (FParameter banL: parammodel.getAllParameter()) {
+                if(banL.getName().equals("PJCC")){
+                    // 如果不是左开孔，报错
+                    // _result.getList().add(createParamModelResult("天地门铰顶底板需要选择【左开孔】"+banL.getValue(), parammodel));
+                    if(Float.parseFloat(banL.getValue()) != 1){
+                        _result.getList().add(createParamModelResult("您画的是【左开门】。天地门铰顶底板需要选择【左开孔】"+banL.getValue(), parammodel));
+                    }
+                }
+            }
+        }
+        // 如果天地门铰前面是右开门
+        if(flag1 == false && flag2 == true){
+            // _result.getList().add(createParamModelResult("flag1"+flag1+"flag2"+flag2, parammodel));
+            // 看天地门铰板的PJCC变量
+            for (FParameter banL: parammodel.getAllParameter()) {
+                if(banL.getName().equals("PJCC")){
+                    // 如果不是右开孔，报错
+                    // _result.getList().add(createParamModelResult("天地门铰顶底板需要选择【左开孔】"+banL.getValue(), parammodel));
+                    if(Float.parseFloat(banL.getValue()) != 2){
+                        _result.getList().add(createParamModelResult("您画的是【右开门】。天地门铰顶底板需要选择【右开孔】"+banL.getValue(), parammodel));
+                    }
+                }
+            }
+        }
+        // 如果天地门铰前面是双开门
+        if(flag1 == true && flag2 == true){
+            // _result.getList().add(createParamModelResult("flag1"+flag1+"flag2"+flag2, parammodel));
+            // 看天地门铰板的PJCC变量
+            for (FParameter banL: parammodel.getAllParameter()) {
+                if(banL.getName().equals("PJCC")){
+                    // 如果不是双开孔，报错
+                    // _result.getList().add(createParamModelResult("天地门铰顶底板需要选择【左开孔】"+banL.getValue(), parammodel));
+                    if(Float.parseFloat(banL.getValue()) != 3){
+                        _result.getList().add(createParamModelResult("您画的是【双开门】。天地门铰顶底板需要选择【双开孔】"+banL.getValue(), parammodel));
+                    }
+                }
+            }
+        }
+        // _result.getList().add(createParamModelResult("天地门铰顶底板测试"+i, parammodel));
+    }
+    
+end

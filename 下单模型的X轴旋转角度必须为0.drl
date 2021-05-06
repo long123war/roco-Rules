@@ -1,0 +1,17 @@
+rule "下单模型的X轴旋转角度必须为0"
+    when
+    // $m:FParamModel( main==null)
+    $m:FParamModel( parent == null)
+then
+// 
+    if($m.getBrandGood().getBrandGoodName().indexOf("斜")==-1 &&
+    $m.getBrandGood().getBrandGoodName().indexOf("补")==-1 &&
+    $m.getBrandGood().getBrandGoodName().indexOf("标识")==-1
+    ){
+        if(Math.abs($m.getRotateDegree().x) != 0 && Math.abs($m.getRotateDegree().x) >0.01){
+            _result.getList().add(createParamModelResult("下单模型的X轴旋转角度必须为0,"+$m.getRotateDegree().x+"不是正确的值，请把X轴旋转角度设置为0", $m));
+        }
+    }
+    
+    
+end

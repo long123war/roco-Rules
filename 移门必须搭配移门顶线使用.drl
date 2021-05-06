@@ -1,0 +1,21 @@
+rule "移门必须搭配移门顶线使用"
+when
+    $m: FParamModel( parent == null && brandGood.brandGoodName.contains("顶封板"))
+    $m2: FParamModel( brandGood.transProdCatId == 797)
+    $p1: FParameter(name == "DXKS") from $m.getAllParameter()
+    $p2: FParameter(name == "H") from $m2.getAllParameter()
+
+then
+    // 查看每一个移门门框上方是否有顶封板
+    // _result.getList().add(createParamModelResult(rangeMinLimitDistance($m2, $m, BaseDirect.Y_POSITIVE,BaseDirect.Z_POSITIVE)+"所有装饰盒:", $m));
+    // _result.getList().add(createParamModelResult(Float.parseFloat($p2.getValue())+"所有装饰盒:", $m));
+    // 判断顶线是不是在移门门框上面
+    if( rangeMinLimitDistance($m2, $m, BaseDirect.Y_POSITIVE,BaseDirect.Z_POSITIVE) == Float.parseFloat($p2.getValue()) ){
+        // _result.getList().add(createParamModelResult(rangeMinLimitDistance($m2, $m, BaseDirect.Y_POSITIVE,BaseDirect.Z_POSITIVE)+"顶线在移门上", $m));
+        // 如果移门门框上面的顶线加固板不是200，报错
+        if( Float.parseFloat($p1.getValue()) != 200){
+            _result.getList().add(createParamModelResult($m.getName() + "需要选择移门顶线", $m));
+        }
+    }  
+    
+end

@@ -1,0 +1,37 @@
+rule "A款背板灯层板不能用作9mm背板的顶板"
+when
+    $list: List() from collect(FParamModel(brandGood.brandGoodName!=null && (brandGood.brandGoodName.indexOf("背板") != -1||brandGood.transProdCatId == 785)))
+    eval($list.size()>1)
+then
+    List<FParamModel> newList = new ArrayList();
+    boolean flag = false;
+    for(Object parammodel: $list){
+        ObjectMapper objectMapper = new ObjectMapper();
+        FParamModel newParammodel = objectMapper.convertValue(parammodel, FParamModel.class);
+        for (FParameter param: newParammodel.getAllParameter()) {
+            if (param.getName().equals("BT") && param.getParsedValue(Integer.class)==9) {
+                newList.add(newParammodel);
+                //_result.getList().add(createParamModelResult("9mm背板基材list-bt："+newList.toString(),newParammodel));
+            }
+            if (param.getName().equals("D") ) {
+                if (FloatUtil.isEqual(param.getParsedValue(Float.class), 9, 0.5f)) {
+                    newList.add(newParammodel);
+                }
+            } 
+        }
+    }
+    // 遍历9mm背板数组
+    for (FParamModel parammodel: newList) {
+        // 找9mm背板上面的模型
+        for(FCustomModel bg:  findModel(parammodel, BaseDirect.Z_POSITIVE, _modelTree)){
+            // 找到紧贴着9mm背板的A款背板灯层
+            // _result.getList().add(createParamModelResult("9mm背板上面的模型"+bg.getName(),bg));
+            if(bg.getBrandGood().getTransProdCatId() == 2055 && bg.getBrandGood().getBrandGoodName().indexOf("层板") != -1 && bg.getBrandGood().getBrandGoodName().indexOf("A款背 板灯") != -1 && bg.getBrandGood().getBrandGoodName() != null){
+                // _result.getList().add(createParamModelResult(rangeMaxLimitDistance(bg, parammodel, BaseDirect.Y_POSITIVE,BaseDirect.Z_POSITIVE)+"9mm背板上面的模型"+bg.getName(),bg));
+                if(rangeMaxLimitDistance(bg, parammodel, BaseDirect.Y_POSITIVE,BaseDirect.Z_POSITIVE)>=18 && rangeMaxLimitDistance(bg, parammodel, BaseDirect.Y_POSITIVE,BaseDirect.Z_POSITIVE)<=41){
+                    _result.getList().add(createParamModelResult("A款背板灯层板不能用作"+parammodel.getBrandGood().getBrandGoodName()+"的顶板！！！",bg));
+                }
+            }
+        }
+    }
+end

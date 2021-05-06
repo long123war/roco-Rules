@@ -1,0 +1,64 @@
+rule "抽屉导轨报错控制"
+when
+    $list: List() from collect(FParamModel(brandGood.transProdCatId!=null && brandGood.transProdCatId == 1043))
+then
+    // if($p1.getValue().equals("1")){
+    //     #CWD1!=200 and #CWD1!=250 and #CWD1!=300 and #CWD1!=350 and #CWD1!=400 and #CWD1!=450
+    // }
+    List<FParamModel> newList = new ArrayList();
+    boolean flag1 = false;
+    boolean flag2 = false;
+    boolean flag3 = false;
+    boolean flag4 = false;
+    boolean flag5 = false;
+    for(Object parammodel: $list){
+            
+        ObjectMapper objectMapper = new ObjectMapper();
+        FParamModel newParammodel = objectMapper.convertValue(parammodel, FParamModel.class);
+        for (FParameter param: newParammodel.getAllParameter()) {
+            // 拿到所有含抽盒深度的模型
+            if (param.getName()!=null && param.getName().equals("CWD1") && param.getParsedValue(Integer.class)>0) {
+                newList.add(newParammodel);
+            }
+        }
+    }
+    // 循环新数组所有模型。
+    for (FParamModel parammodel: newList) {
+        // 循环模型里的变量
+        for(FParameter dg: parammodel.getAllParameter()){
+            // 普通导轨
+            if(dg.getName()!=null && dg.getName().equals("DGKS") && dg.getValue()!=null && dg.getValue().equals("1")){
+                flag1 = true;
+            // 缓冲导轨
+            }else if(dg.getName()!=null && dg.getName().equals("DGKS") && dg.getValue()!=null && dg.getValue().equals("2")){
+                    _result.getList().add(createParamModelResult("抽盒深度不能做缓冲导轨！！"+dg.getParsedValue(Integer.class), parammodel));
+
+                flag2 = true;
+            }else if(dg.getName()!=null && dg.getName().equals("DGKS") && dg.getValue()!=null &&  dg.getValue().equals("2")){
+                flag3 = true;
+            }else if(dg.getName()!=null && dg.getName().equals("DGKS") && dg.getValue()!=null &&  dg.getValue().equals("2")){
+                flag4 = true;
+            }else{
+                flag5 = true;
+            }
+            // if(flag1 == true){
+            //     if(dg.getName().equals("CWD1") && 
+            //     dg.getParsedValue(Integer.class)!=200 &&
+            //     dg.getParsedValue(Integer.class)!=250 &&
+            //     dg.getParsedValue(Integer.class)!=300 &&
+            //     dg.getParsedValue(Integer.class)!=400 &&
+            //     dg.getParsedValue(Integer.class)!=450){
+            //         _result.getList().add(createParamModelResult("抽盒深度不能做缓冲导轨！！"+dg.getParsedValue(Integer.class), parammodel));
+            //     }
+            // }
+            // if(flag2 == true){
+            //     if(dg.getName().equals("CWD1") && (dg.getParsedValue(Integer.class)!=350 && dg.getParsedValue(Integer.class)!=400)){
+            //         _result.getList().add(createParamModelResult("抽盒深度不能做缓冲导轨！！"+dg.getParsedValue(Integer.class), parammodel));
+            //     }
+            // }
+        }
+        
+    }
+
+    
+end

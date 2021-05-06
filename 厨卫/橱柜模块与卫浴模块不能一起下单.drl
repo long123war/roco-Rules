@@ -1,0 +1,31 @@
+rule "橱柜模块与卫浴模块不能一起下单"
+when
+    $m:FParamModel( parent == null)
+    // 所有顶级模型数组
+    $list : List() from collect(FParamModel(brandGood.brandGoodName!=null && parent == null && brandGood.transProdCatId != 502))
+then 
+    // _result.getList().add(createParamModelResult($list1.size()+"test",$m));
+    List<FParamModel> newList = new ArrayList();
+        boolean flag = false;
+        boolean flag2 = false;
+        // 遍历list，把含有LKWY变量的模块拿出来组成一个新数组。
+        for(Object parammodel: $list){
+            ObjectMapper objectMapper = new ObjectMapper();
+            FParamModel newParammodel = objectMapper.convertValue(parammodel, FParamModel.class);
+            for (FParameter param: newParammodel.getAllParameter()) {
+                // 把哈有LKWY的模块加入新数组newList
+                if (param.getName().equals("LKWY")) {
+                    newList.add(newParammodel);
+                }
+            }
+        }
+        if(newList.size() == 0){
+
+        }else{
+            if($list.size() != newList.size()){
+                _result.getList().add(createParamModelResult("卫浴模块不能与橱柜模块混合下单！！"+"模块数："+$list.size()+",卫浴模块数："+newList.size(),$m));
+            }
+        }
+        
+
+end

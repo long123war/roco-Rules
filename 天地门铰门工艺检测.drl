@@ -1,0 +1,41 @@
+rule "判断顶板是否是天地铰链顶板-修正"
+when
+    $m1: FParamModel(brandGood.brandGoodName.contains("窄框玻璃门")!=null && brandGood.brandGoodName.contains("窄框玻璃门"))
+    $m2: FParamModel(!brandGood.brandGoodName.contains("天地") && (brandGood.brandGoodName.contains("顶固层") || brandGood.brandGoodName.contains("顶板"))&& brandGood.transProdCatId ==713 && $m2.getParent().getId()==$m2.getRootOrMainModel().getId()) from findModel($m1, BaseDirect.Y_POSITIVE, _modelTree)
+    eval(rangeMaxLimitDistance($m1, $m2, BaseDirect.Y_POSITIVE,BaseDirect.Z_POSITIVE)<5)
+then 
+    _result.getList().add(createParamModelResult("模型:【" + $m2.getName() + "】应替换成可以安装天地铰链的顶板"+rangeMaxLimitDistance($m1, $m2, BaseDirect.Y_POSITIVE,BaseDirect.Z_POSITIVE) ,$m2));
+end
+
+
+
+rule "判断底板是是天地铰链底板 - 修正"
+when
+    $m1: FParamModel(brandGood.brandGoodName.indexOf("窄框玻璃门") != -1)
+    $m2: FParamModel(!brandGood.brandGoodName.contains("天地") && brandGood.brandGoodName.indexOf("底座") != -1) from findModel($m1, BaseDirect.Y_POSITIVE, _modelTree)
+    $p: FParameter(Name == "TH") from $m2.getParameter()
+    eval(rangeMinLimitDistance($m1, $m2, BaseDirect.Y_POSITIVE,BaseDirect.Z_POSITIVE)-$p.getParsedValue(Float.class)<5)
+then
+    _result.getList().add(createParamModelResult("模型:【" + $m2.getName() +$p.getParsedValue(Float.class)+ "】应替换成可以安装天地铰链的底座"+rangeMinLimitDistance($m1, $m2, BaseDirect.Y_POSITIVE,BaseDirect.Z_POSITIVE),$m2));
+    // _result.getList().add(createParamModelResult("test",$m2));
+end
+
+rule "用D款内嵌灯层板时不可用ML-4天地门铰门"
+when
+    $m1: FParamModel(brandGood.brandGoodName.indexOf("窄框玻璃门") != -1)
+    $m2: FParamModel(brandGood.brandGoodName.contains("D款内嵌灯") && brandGood.brandGoodName.contains("层板")) from findModel($m1, BaseDirect.Y_POSITIVE, _modelTree)
+    $p: FParameter(Name == "D") from $m2.getParameter()
+    eval(rangeMinLimitDistance($m1, $m2, BaseDirect.Z_POSITIVE,BaseDirect.Y_POSITIVE)>3 && rangeMinLimitDistance($m1, $m2, BaseDirect.Z_POSITIVE,BaseDirect.Y_POSITIVE) <$p.getParsedValue(Float.class))
+then
+    _result.getList().add(createParamModelResult("模型:【" + $m2.getName() + "】不能与模型：【" + $m2.getName() +"】搭配使用！！",$m2));
+end
+
+rule "用D款内嵌灯侧板时不可用ML-4天地门铰门"
+when
+    $m1: FParamModel(brandGood.brandGoodName.indexOf("窄框玻璃门") != -1)
+    $m2: FParamModel(brandGood.brandGoodName.contains("D款内嵌灯") && brandGood.brandGoodName.contains("侧板")) from findModel($m1, BaseDirect.Y_POSITIVE, _modelTree)
+    $p: FParameter(Name == "D") from $m2.getParameter()
+    eval(rangeMinLimitDistance($m1, $m2, BaseDirect.Z_POSITIVE,BaseDirect.Y_POSITIVE)>3 && rangeMinLimitDistance($m1, $m2, BaseDirect.Z_POSITIVE,BaseDirect.Y_POSITIVE) <$p.getParsedValue(Float.class))
+then
+    _result.getList().add(createParamModelResult("模型:【" + $m2.getName() + "】不能与模型：【" + $m2.getName() +"】搭配使用！！",$m2));
+end

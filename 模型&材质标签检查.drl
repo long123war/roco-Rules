@@ -1,0 +1,15 @@
+rule "模型&材质标签检查"
+when
+    $m1:FParamModel(brandGood.brandGoodName!=null && brandGood.seriesTagName!=null && name.indexOf("顶层包裹")==-1)
+    $bg: FBrandGood() from getParameterBrandGoods($m1,"material")
+then
+
+if ($m1.getBrandGood().getSeriesTagName().equals("CPYC")) {
+    	_result.getList().add(createParamModelResult("提示信息：模型=【"+$m1.getName() +"】产品异常！！！"+"9mm背板置换操作指引：https://mp.weixin.qq.com/s/OikirX-l1yWT7n1ja6MwgQ",$m1));
+    }else if ($m1.getBrandGood().getSeriesTagName().equals("无")) {
+    	_result.getList().add(createParamModelResult("提示信息：模型=【"+$m1.getName() +"】无效旧数据!",$m1));
+    }
+if ($bg.getSeriesTagName().equals("CPYC")) {
+    	_result.getList().add(createParamModelResult("材质=【"+$bg.getBrandGoodName() + "】 当前无材质 " + $bg.getSeriesTagName(), $m1));
+    }
+end

@@ -1,0 +1,11 @@
+rule "模型的Z旋转角度是否为0、90、180、270、360度"
+    when
+    $m:FParamModel( parent == null)
+then
+    if(Math.abs($m.getRotateDegree().z%90) > 0.01 && Math.abs($m.getRotateDegree().z%90) < 89.99){
+        _result.getList().add(createParamModelResult("模型角度"+$m.getRotateDegree().z+"不是合理的角度，角度必须是90的倍数"+$m.getRotateDegree().z%90, $m));
+        _result.getList().add(createParamModelResult("操作指引链接：https://mp.weixin.qq.com/s/XK3DTNQKbbtWoxo0DYy7nQ", $m));
+    
+    // _result.getList().add(createParamModelResult("模型角度"+$m.getRotateDegree().z+"不是合理的角度，角度必须是90的倍数"+Math.abs($m.getRotateDegree().z%90), $m));
+    }       
+end

@@ -1,0 +1,27 @@
+rule "12mm板件放在12mm装饰盒中正常，否则报错"
+when
+    $m: FParamModel(parent == null && brandGood.transProdCatId != 725 && brandGood.brandGoodName.indexOf("虚拟")==-1)
+    $sub: FParamModel(brandGood.brandGoodName!=null && brandGood.transProdCatId==713 && brandGood.brandGoodName.indexOf("12厘")!=-1) from $m.getSubModels()
+    $list1 : List() from collect(FParamModel(brandGood.brandGoodName!=null && brandGood.brandGoodName.indexOf("固层_12")!=-1) from CollectionUtils.union(findModel($sub, BaseDirect.Z_POSITIVE, _modelTree), findModel($sub, BaseDirect.Z_NEGATIVE, _modelTree)))
+	$list2 : List() from collect(FParamModel(brandGood.brandGoodName!=null && brandGood.brandGoodName.indexOf("侧板_12")!=-1) from CollectionUtils.union(findModel($sub, BaseDirect.X_POSITIVE, _modelTree), findModel($sub, BaseDirect.X_NEGATIVE, _modelTree)))
+    $list3 : List() from collect(FParamModel(brandGood.brandGoodName!=null && brandGood.brandGoodName.indexOf("侧板_12")!=-1) from CollectionUtils.union(findModel($sub, BaseDirect.Y_POSITIVE, _modelTree), findModel($sub, BaseDirect.Y_NEGATIVE, _modelTree)))
+    eval(!(($list1.size()>0 && $list2.size()>0)||($list1.size()>0 && $list3.size()>0)))
+then 
+    _result.getList().add(createParamModelResult("板件:【" + $sub.getName() + "】应替换为厚度>=18mm的板件1",$sub));
+end
+
+rule "非12mm板件放在12mm装饰盒中报错"
+when
+    $m: FParamModel(parent == null && brandGood.transProdCatId != 725)
+    $m1: FParamModel(brandGood.brandGoodName!=null && brandGood.brandGoodName.indexOf("顶固层_12")!=-1) 
+    $m2: FParamModel(brandGood.brandGoodName!=null && brandGood.brandGoodName.indexOf("底固层_12")!=-1) 
+    $sub: FParamModel(brandGood.brandGoodName!=null && brandGood.transProdCatId==713 && brandGood.brandGoodName.indexOf("12厘")==-1 && brandGood.brandGoodName.indexOf("背板")==-1 && ignore==false) 
+    from CollectionUtils.intersection(findModel($m2, BaseDirect.Z_POSITIVE, _modelTree), findModel($m1, BaseDirect.Z_NEGATIVE, _modelTree))
+	$p1: FParameter(name == "W") from $sub.getAllParameter()
+	$p2: FParameter(name == "D") from $sub.getAllParameter()
+	$p3: FParameter(name == "H") from $sub.getAllParameter()
+	eval($m1.getParent().getId()==$m2.getParent().getId() && $sub.getParent().getId()==$m.getId() && $p1.getParsedValue(Float.class)>0 && $p2.getParsedValue(Float.class)>0 && $p3.getParsedValue(Float.class)>0)
+then
+	_result.getList().add(createParamModelResult("板件:【" + $sub.getName() + "】应替换为12mm板件",$sub)); 
+
+end

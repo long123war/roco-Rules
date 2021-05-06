@@ -1,0 +1,12 @@
+rule "边柜内空旋转后，放入该内空的层板也要符合内空朝向-边柜"
+when
+    $m1: FCustomModel(brandGood.brandGoodName!=null && brandGood.brandGoodName.indexOf("背板") != -1)
+    $m2: FCustomModel(brandGood.brandGoodName!=null && (brandGood.brandGoodName.indexOf("侧") != -1||brandGood.brandGoodName.indexOf("竖") != -1)) from findModel($m1, BaseDirect.Y_NEGATIVE, _modelTree)
+    $m3: FCustomModel(brandGood.brandGoodName!=null && brandGood.brandGoodName.indexOf("层") != -1&& brandGood.brandGoodName.indexOf("顶") == -1&& brandGood.brandGoodName.indexOf("底") == -1
+            && brandGood.brandGoodName.indexOf("转角") == -1&& brandGood.brandGoodName.indexOf("切角") == -1&& brandGood.brandGoodName.indexOf("斜边") == -1&& brandGood.brandGoodName.indexOf("五角") == -1) from findModel($m2, BaseDirect.Y_POSITIVE, _modelTree)
+    eval($m2.getRotateDegree().z-$m1.getRotateDegree().z!=0 && $m3.getParent()!=null && $m1.getParent()!=null && $m2.getParent()!=null && ($m2.getRotateDegree().z-$m3.getRotateDegree().z>10 || $m2.getRotateDegree().z-$m3.getRotateDegree().z<-10) && 
+            sizeDistance($m3, $m2, BaseDirect.X_POSITIVE,BaseDirect.Z_POSITIVE)<1 && $m3.getRootOrMainModel().getId()==$m3.getParent().getId()&& $m1.getRootOrMainModel().getId()==$m1.getParent().getId()
+            && $m2.getRootOrMainModel().getId()==$m2.getParent().getId())
+then
+    _result.getList().add(createParamModelResult("优化 - 模型：【" + $m3.getName()+"】应该使用 “内空设计” 旋转板件，以保证孔位正常，旋转角度RotateDegree: "+$m2.getRotateDegree().z, $m3)); 
+end

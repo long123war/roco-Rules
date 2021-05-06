@@ -1,0 +1,42 @@
+rule "拼框抽屉选择托底导轨时，左右不能内嵌"
+when
+    $list: List() from collect(FParamModel(brandGood.transProdCatId!=null && brandGood.transProdCatId == 1043))
+then
+    // if($p1.getValue().equals("1")){
+    //     #CWD1!=200 and #CWD1!=250 and #CWD1!=300 and #CWD1!=350 and #CWD1!=400 and #CWD1!=450
+    // }
+    List<FParamModel> newList = new ArrayList();
+    for(Object parammodel: $list){
+            
+        ObjectMapper objectMapper = new ObjectMapper();
+        FParamModel newParammodel = objectMapper.convertValue(parammodel, FParamModel.class);
+        for (FParameter param: newParammodel.getAllParameter()) {
+            // 拿到所有选了托底导轨的拼框抽屉
+            if(
+            (matchExpression("@A.DGKS == '4'", newParammodel) || matchExpression("@A.DGKS == '5'", newParammodel)) &&
+            (matchExpression("@A.CMKS == 2", newParammodel) || 
+            matchExpression("@A.CMKS == 3", newParammodel) || 
+            matchExpression("@A.CMKS == 21", newParammodel) || 
+            matchExpression("@A.CMKS == 22", newParammodel) || 
+            matchExpression("@A.CMKS == 25", newParammodel) || 
+            matchExpression("@A.CMKS == 31", newParammodel) || 
+            matchExpression("@A.CMKS == 62", newParammodel)) &&
+            (matchExpression("@A.lCover == 0", newParammodel) || matchExpression("@A.rCover == 0", newParammodel))
+            ){
+                // newList.add(newParammodel);
+                _result.getList().add(createParamModelResult(newParammodel.getName()+"选了托底导轨，左右不能做内嵌！", newParammodel));
+            }
+            // if (param.getName()!=null && param.getName().equals("DGKS")) {
+            //     if(param.getValue().equals("4")||param.getValue().equals("5")){
+            //         newList.add(newParammodel);
+            //     }
+            // }
+        }
+    }
+    // 遍历所有抽屉
+    // for (FParamModel parammodel: newList) {
+    //     _result.getList().add(createParamModelResult("选了托底导轨的抽屉", parammodel));
+    // }
+
+    
+end

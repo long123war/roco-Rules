@@ -1,0 +1,59 @@
+rule "生成的B型地脚板不能单独下单"
+// 控制方案里无任何模块只有地脚板的情况
+when
+    $m: FParamModel(parent==null)
+    // $g: FParamModel(parent==null)
+    $bg: FBrandGood() from getParameterBrandGoods($m,"shape")
+    $list: List() from collect(FParamModel(parent==null && brandGood.transProdCatId != null &&(brandGood.transProdCatId == 684 || 
+    brandGood.transProdCatId == 686 || 
+    brandGood.transProdCatId == 696 || 
+    brandGood.transProdCatId == 481 || 
+    brandGood.transProdCatId == 719)))
+    eval($list.size()==0)
+then
+    // _result.getList().add(createParamModelResult("test："+ $list.size(), $m));
+    // boolean flag = false;
+    // if($g.getBrandGood().getBrandGoodName().indexOf("地柜")!=-1){
+    //     flag = true;
+    // }
+    // if(flag == false){
+    //     _result.getList().add(createParamModelResult($bg.getBrandGoodName() + "("+ $bg.getObsBrandGoodId() +") 产品编码是 " + $bg.getBrandGoodCode(), $m));
+    // }
+    // 如果名字不为空，且名字含B型地脚板
+    if($bg.getBrandGoodName()!=null && $bg.getBrandGoodName().indexOf("B型地脚板")!=-1){
+        _result.getList().add(createParamModelResult($bg.getBrandGoodName() + "是柜体附属配件，单补时需要单独画，不能采用生成的方式！！", $m));
+    }
+end
+
+rule "生成的B型地脚板必须与柜子一起下单"
+// 控制地脚板上方没有模块时下单的情况
+when
+    $m: FParamModel(parent==null && brandGood.brandGoodName != null && brandGood.brandGoodName.contains("脚线"))
+then
+    boolean flag = false;
+    // 过滤真分类是柜体的产品，并且排除一些特殊产品
+    // φ是单补电器的符号
+    for(FCustomModel paramModel: findModel($m, BaseDirect.Z_POSITIVE, _modelTree)){
+        if(
+        paramModel.getBrandGood().getTransProdCatId()!=null &&
+        (paramModel.getBrandGood().getTransProdCatId()==684 ||
+        paramModel.getBrandGood().getTransProdCatId()==686 || 
+        paramModel.getBrandGood().getTransProdCatId()==696 ||
+        paramModel.getBrandGood().getTransProdCatId()==481 ||
+        paramModel.getBrandGood().getTransProdCatId()==719)
+        &&
+        paramModel.getBrandGood().getBrandGoodName()!=null &&
+        paramModel.getBrandGood().getBrandGoodName().indexOf("虚拟")==-1 &&
+        paramModel.getBrandGood().getBrandGoodName().indexOf("φ")==-1 &&
+        paramModel.getBrandGood().getBrandGoodName().indexOf("台上")==-1 &&
+        paramModel.getBrandGood().getBrandGoodName().indexOf("单补")==-1
+        ){
+            flag = true;
+        }
+        
+    }
+    if(flag==false){
+        _result.getList().add(createParamModelResult($m.getBrandGood().getBrandGoodName() + "是柜体附属配件，单补时需要单独画，不能采用生成的方式！！！！", $m));
+    }
+        // _result.getList().add(createParamModelResult($m.getParent().getName() + "！！", $m));
+end

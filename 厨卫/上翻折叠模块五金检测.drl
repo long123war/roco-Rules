@@ -1,0 +1,64 @@
+rule "上翻折叠门吊柜折叠五金检测"
+when
+    $m1 : FParamModel(brandGood.transProdCatId!=null && brandGood.transProdCatId == 498)
+    $parent: FParamModel() from $m1.getParent()
+    $p1: FParameter(name == "MB_FG") from $m1.getAllParameter()
+    $p2: FParameter(name == "W") from $m1.getAllParameter()
+    $p3: FParameter(name == "HCQ2") from $m1.getAllParameter()
+then
+    if($parent.getName().indexOf("上翻折叠门吊柜")!=-1 || $parent.getName().indexOf("内置上翻折叠门吊柜")!=-1){
+        // (MB_FG==2或MB_FG==3)并且(W==700或W==800)并且HCQ2==3
+        if(($p1.getParsedValue(Integer.class)==2 || $p1.getParsedValue(Integer.class)==3)&&
+        ($p2.getParsedValue(Float.class)==697 || $p2.getParsedValue(Float.class)==797)&&
+        $p3.getParsedValue(Integer.class)==3
+        
+        ){
+            _result.getList().add(createParamModelResult("上翻折叠门吊柜折叠五金不对！！！请更新/重画！！", $m1));
+
+        }
+        // (MB_FG==5或MB_FG==114)并且(W==600或W==700或W==800)并且HCQ2==3
+        if(($p1.getParsedValue(Integer.class)==5 || $p1.getParsedValue(Integer.class)==114)&&
+        ($p2.getParsedValue(Float.class)==597 || $p2.getParsedValue(Float.class)==697 || $p2.getParsedValue(Float.class)==797)&&
+        $p3.getParsedValue(Integer.class)==3
+        
+        ){
+            _result.getList().add(createParamModelResult("上翻折叠门吊柜折叠五金不对！！！请更新/重画！！", $m1));
+        }
+        // (MB_FG==42或MB_FG==54)并且(W==800)并且HCQ2==3
+        if(($p1.getParsedValue(Integer.class)==42 || $p1.getParsedValue(Integer.class)==54)&&
+        ($p2.getParsedValue(Float.class)==797)&&
+        $p3.getParsedValue(Integer.class)==3
+        
+        ){
+            _result.getList().add(createParamModelResult("上翻折叠门吊柜折叠五金不对！！！请更新/重画！！", $m1));
+        }
+    }
+    
+end
+
+rule "上翻折叠门吊柜折叠五金检测-基材"
+when
+    $m1 : FParamModel(brandGood.transProdCatId!=null && brandGood.transProdCatId == 498)
+    $parent: FParamModel() from $m1.getParent()
+    $bg: FBrandGood() from getParameterBrandGoods($m1,"material")
+    $p2: FParameter(name == "W") from $m1.getAllParameter()
+    $p3: FParameter(name == "HCQ2") from $m1.getAllParameter()
+then
+    if($bg.getBaseTexture().equals("101")||
+    $bg.getBaseTexture().equals("103")||
+    $bg.getBaseTexture().equals("104")||
+    $bg.getBaseTexture().equals("105")||
+    $bg.getBaseTexture().equals("106")||
+    $bg.getBaseTexture().equals("107")
+    ){
+        if($parent.getName().indexOf("上翻折叠门吊柜")!=-1 || $parent.getName().indexOf("内置上翻折叠门吊柜")!=-1){
+            // (JC==101或JC==103或JC==104或JC==105或JC==106或JC==107)并且(W==900)并且HCQ2==2
+            if(($p2.getParsedValue(Float.class)==897)&&
+            $p3.getParsedValue(Integer.class)==2
+            ){
+                _result.getList().add(createParamModelResult("上翻折叠门吊柜折叠五金不对！！！请更新/重画！！", $m1));
+            }
+        }
+
+    }
+end

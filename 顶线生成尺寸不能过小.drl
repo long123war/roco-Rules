@@ -1,0 +1,7 @@
+// 生成的线条无法获取变量
+rule "顶线生成尺寸不能过小"
+    when
+    $m:FParamModel( parent == null && brandGood.transProdCatId == 576)
+then
+    _result.getList().add(createParamModelResult("长度大于0"+$m.getSize().x, $m));
+end

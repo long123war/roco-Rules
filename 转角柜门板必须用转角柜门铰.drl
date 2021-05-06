@@ -1,0 +1,78 @@
+rule "五角柜门板必须用转角柜门铰"
+when
+    $m: FParamModel(name.indexOf("门") != -1)
+    // 获取门铰类型
+    $mj: FParameter(name == "MJKS") from $m.getAllParameter()
+    // 获取掩盖方式
+    $yg: FParameter(name == "coverType") from $m.getAllParameter()
+    $parent: FParamModel() from $m.getParent()
+    $parentMGFS: FParameter(name == "MGFS") from $parent.getAllParameter()
+then
+    // 五角柜模块选外盖时
+    if($parent.getName().indexOf("五角") != -1 && $parent.getName()!=null && $parentMGFS.getValue().equals("1")){
+        // 如果在五角柜里，门板的门铰是165度大曲且是内嵌时结束，否则报错
+        if($mj.getValue().equals("4") && $yg.getValue().equals("0")){
+            return;
+        // 如果在五角柜里，门板的门铰是165度直曲且是全盖时结束，否则报错
+        }else if($mj.getValue().equals("5") && $yg.getValue().equals("2")){
+            return;
+            // 门铰自备
+        }else if($mj.getValue().equals("0")){
+            return;
+        }else{
+            _result.getList().add(createParamModelResult("五角柜门板内嵌时必须选择165大曲门铰，全盖时为165直曲！！！", $m));
+        }
+        // _result.getList().add(createParamModelResult("五角柜"+$mj.getValue(), $m));
+    }
+    // 五角柜，模块选内嵌时
+    if($parent.getName().indexOf("五角") != -1 && $parent.getName()!=null && $parentMGFS.getValue().equals("20")){
+        // 如果在五角柜里，门板的门铰是165度大曲时结束，否则报错
+        if($mj.getValue().equals("4")){
+            return;
+            // 门铰自备
+        }else if($mj.getValue().equals("0")){
+            return;
+        }else{
+            _result.getList().add(createParamModelResult("五角柜门板方式为内嵌门板时，必须选择165大曲门铰！！！", $m));
+        }
+        // _result.getList().add(createParamModelResult("五角柜"+$mj.getValue(), $m));
+    }
+end
+
+rule "转角柜门板必须用转角柜门铰"
+when
+// 检测规则：名称带门，同时不是上翻门和下翻门
+    $m: FParamModel(name.indexOf("门") != -1 && name.indexOf("上翻门") == -1 && name.indexOf("下翻门") == -1)
+    // 获取门铰类型
+    $mj: FParameter(name == "MJKS") from $m.getAllParameter()
+    // 获取开门方向
+    $mfx: FParameter(name == "openDirection") from $m.getAllParameter()
+    // 获取掩盖方式
+    $yg: FParameter(name == "coverType") from $m.getAllParameter()
+    $parent: FParamModel() from $m.getParent()
+then
+    if($parent.getName().indexOf("转角") != -1 && $parent.getName()!=null && 
+    $parent.getName().indexOf("转角台面") == -1 &&
+    $parent.getName().indexOf("转角台下柜") == -1
+    
+    ){
+        // _result.getList().add(createParamModelResult("测试："+$mfx.getValue(), $m));
+        // 如果开门方向是上下翻，无需检测
+        if($mfx.getValue().equals("2") || $mfx.getValue().equals("3")){
+            
+        }else{
+            // 如果在转角柜里，门板的门铰是165度直曲或165大曲时结束，否则报错
+            if($mj.getValue().equals("5") || $mj.getValue().equals("4")){
+                return;
+                // 门铰自备
+            }else if($mj.getValue().equals("0")){
+                return;
+            }else{
+                _result.getList().add(createParamModelResult("转角柜必须选择165直曲或大曲门铰！！！", $m));
+            }
+        }
+        
+    }
+    // _result.getList().add(createParamModelResult("模型角度"+$m.getRotateDegree().z+"不是合理的角度，角度必须是90的倍数"+Math.abs($m.getRotateDegree().z%90), $m));
+    
+end

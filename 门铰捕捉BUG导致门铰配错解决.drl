@@ -1,0 +1,122 @@
+rule "门铰捕捉BUG导致门铰配错解决-左开门"
+when
+// 获得而所有门铰组左边的侧板和自由中竖板
+    // $m: FParamModel(brandGood.transProdCatId == 713 && name.indexOf("门铰组") != -1)
+    // $m: FParamModel(name.indexOf("门") != -1)
+    // $mk: FParameter(name == "MJDZ") from $m.getAllParameter()
+    $list: List() from collect(FParamModel(brandGood.transProdCatId == 713 && name.indexOf("门铰组") != -1))
+then
+    List<FParamModel> newList = new ArrayList();
+
+    for(Object parammodel: $list){
+        ObjectMapper objectMapper = new ObjectMapper();
+        FParamModel newParammodel = objectMapper.convertValue(parammodel, FParamModel.class);
+        for (FParameter param: newParammodel.getAllParameter()) {
+            if (param.getName().equals("KMFX") && param.getParsedValue(Integer.class)==0) {
+                newList.add(newParammodel);
+            }
+        }
+    }
+    
+    //  遍历newList数组，看每一个门铰组左边有无侧板
+    for (FParamModel parammodel: newList) {
+        // _result.getList().add(createParamModelResult("测试："+parammodel.getName(),parammodel));
+        // 找门铰组左边的模型，排除榻榻米
+        if(parammodel.getRoot().getName()!=null && parammodel.getRoot().getName().indexOf("榻榻米")==-1){
+            for(FCustomModel paramModelLeft: findModel(parammodel, BaseDirect.X_NEGATIVE, _modelTree)){
+                // 只看侧板和中竖板，排除榻榻米、装饰盒
+                if(paramModelLeft.getBrandGood().getTransProdCatId() == 713 && 
+                paramModelLeft.getRoot().getName().indexOf("榻榻米")==-1 && 
+                paramModelLeft.getParent().getName().indexOf("装饰盒")==-1 && 
+                paramModelLeft.getRoot().getName()!=null && 
+                rangeMinLimitDistance(paramModelLeft, parammodel, BaseDirect.Z_POSITIVE,BaseDirect.X_POSITIVE)< 41 && 
+                paramModelLeft.getRoot().getName() == parammodel.getRoot().getName() && 
+                (paramModelLeft.getBrandGood().getBrandGoodName().contains("侧板") || paramModelLeft.getBrandGood().getBrandGoodName().contains("中竖板"))
+                ){
+                    // _result.getList().add(createParamModelResult("门铰左边有这些侧板:"+rangeMinLimitDistance(paramModelLeft, parammodel, BaseDirect.Z_POSITIVE,BaseDirect.X_POSITIVE), paramModelLeft,parammodel));
+                    // 遍历侧板的变量
+                    for (FParameter ban: paramModelLeft.getAllParameter()) {
+                        // _result.getList().add(createParamModelResult("门铰组前面的门板变量："+ban.getName() + ban.getValue(), paramModelLeft));
+                        // 判断盖法与实际位置不对应的情况
+                        if(ban.getName().equals("W")){
+                            if(rangeMinLimitDistance(paramModelLeft, parammodel, BaseDirect.Z_POSITIVE,BaseDirect.X_POSITIVE)>0 && 
+                            rangeMinLimitDistance(paramModelLeft, parammodel, BaseDirect.Z_POSITIVE,BaseDirect.X_POSITIVE)< Float.parseFloat(ban.getValue()) &&
+                            rangeMinLimitDistance(paramModelLeft, parammodel, BaseDirect.Z_POSITIVE,BaseDirect.X_POSITIVE)< 41
+                            
+                            ){
+                                _result.getList().add(createParamModelResult("左掩门盖法与实际不匹配，请调整掩门的[门铰边盖值]"+rangeMinLimitDistance(paramModelLeft, parammodel, BaseDirect.Z_POSITIVE,BaseDirect.X_POSITIVE)+"板："+Float.parseFloat(ban.getValue()), paramModelLeft));
+                                // _result.getList().add(createParamModelResult("左掩门盖法与实际不匹配，请调整掩门的[门铰边盖值]"+ban.getValue(), parammodel));
+                                return;
+                            }
+                        }
+                        
+                    }
+                    
+                }
+            }
+
+        }
+    }
+end
+
+rule "门铰捕捉BUG导致门铰配错解决-右开门"
+when
+// 获得而所有门铰组右边的侧板和自由中竖板
+    // $m: FParamModel(brandGood.transProdCatId == 713 && name.indexOf("门铰组") != -1)
+    // $m: FParamModel(name.indexOf("门") != -1)
+    // $mk: FParameter(name == "MJDZ") from $m.getAllParameter()
+    $list2: List() from collect(FParamModel(brandGood.transProdCatId == 713 && name.indexOf("门铰组") != -1))
+then
+    List<FParamModel> newList2 = new ArrayList();
+
+    for(Object parammodelR: $list2){
+        ObjectMapper objectMapper = new ObjectMapper();
+        FParamModel newParammodel = objectMapper.convertValue(parammodelR, FParamModel.class);
+        for (FParameter param: newParammodel.getAllParameter()) {
+            if (param.getName().equals("KMFX") && param.getParsedValue(Integer.class)==1) {
+                newList2.add(newParammodel);
+            }
+            
+        }
+    }
+    
+    //  遍历newList数组，看每一个门铰组右边有无侧板
+    for (FParamModel parammodelR: newList2) {
+        // _result.getList().add(createParamModelResult("测试："+parammodel.getName(),parammodel));
+        // 找门铰组右边的模型，排除榻榻米
+        if(parammodelR.getRoot().getName()!=null && parammodelR.getRoot().getName().indexOf("榻榻米")==-1 && parammodelR.getName().indexOf("装饰盒")==-1){
+
+            for(FCustomModel paramModelRight: findModel(parammodelR, BaseDirect.X_POSITIVE, _modelTree)){
+                // 只看侧板和中竖板，排除榻榻米
+                if(paramModelRight.getBrandGood().getTransProdCatId() == 713 && 
+                paramModelRight.getRoot().getName().indexOf("榻榻米")==-1 && 
+                paramModelRight.getParent().getName().indexOf("装饰盒")==-1 && 
+                paramModelRight.getRoot().getName()!= null && 
+                rangeMaxLimitDistance(paramModelRight, parammodelR, BaseDirect.Z_POSITIVE,BaseDirect.X_POSITIVE)< 41 && 
+                paramModelRight.getRoot().getName() == parammodelR.getRoot().getName() && 
+                (paramModelRight.getBrandGood().getBrandGoodName().contains("侧板") || paramModelRight.getBrandGood().getBrandGoodName().contains("中竖板"))
+                ){
+                    // _result.getList().add(createParamModelResult("门铰右边有这些侧板:"+parammodel.getId(), paramModelRight));
+                    // 遍历侧板的变量
+                    for (FParameter banR: paramModelRight.getAllParameter()) {
+                        // _result.getList().add(createParamModelResult("门铰组前面的门板变量："+banR.getName() + banR.getValue(), paramModelRight));
+                        // 判断盖法与实际位置不对应的情况
+                        if(banR.getName().equals("W")){
+                            // _result.getList().add(createParamModelResult("最小值："+rangeMinLimitDistance(paramModelRight, parammodelR, BaseDirect.Z_POSITIVE,BaseDirect.X_POSITIVE)+"最大值"+rangeMaxLimitDistance(paramModelRight, parammodelR, BaseDirect.Z_POSITIVE,BaseDirect.X_POSITIVE), paramModelRight));
+                            if(rangeMaxLimitDistance(paramModelRight, parammodelR, BaseDirect.Z_POSITIVE,BaseDirect.X_POSITIVE) > 0 && 
+                            rangeMaxLimitDistance(paramModelRight, parammodelR, BaseDirect.Z_POSITIVE,BaseDirect.X_POSITIVE)< Float.parseFloat(banR.getValue()) &&
+                            rangeMaxLimitDistance(paramModelRight, parammodelR, BaseDirect.Z_POSITIVE,BaseDirect.X_POSITIVE)< 41
+                            ){
+                                _result.getList().add(createParamModelResult("右掩门盖法与实际不匹配，请调整掩门的[门铰边盖值]"+rangeMaxLimitDistance(paramModelRight, parammodelR, BaseDirect.Z_POSITIVE,BaseDirect.X_POSITIVE), paramModelRight));
+                                // _result.getList().add(createParamModelResult("右掩门盖法与实际不匹配，请调整掩门的[门铰边盖值]"+banR.getValue(), paramModelRight));
+                                return;
+                            }
+                        }
+                        
+                    }
+                    
+                }
+            }
+        }
+    }
+end

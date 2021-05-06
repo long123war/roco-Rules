@@ -1,0 +1,47 @@
+rule "粘盆费必须有台面"
+// 控制方案里无台面时不可以选粘盆费
+when
+    $m: FParamModel(parent==null )
+    // 是否粘盆变量
+    $zpf: FParameter(name == "SFZP") from $m.getAllParameter()
+    // 取所有父模型的数组
+    $list: List() from collect(FParamModel(parent==null))
+then
+    
+    List<FParamModel> newList = new ArrayList();
+    boolean flag = false;
+    boolean flag2 = false;
+    for(Object parammodel: $list){
+            
+        ObjectMapper objectMapper = new ObjectMapper();
+        FParamModel newParammodel = objectMapper.convertValue(parammodel, FParamModel.class);
+        for (FParameter param: newParammodel.getAllParameter()) {
+            newList.add(newParammodel);
+        }
+    }
+    // 循环所有元素的数组。
+    for (FParamModel parammodel: newList) {
+        // 是橱柜台面
+        if(parammodel.getName().indexOf("橱柜台面")!=-1){
+            flag = true;
+        }
+        // 不是橱柜台面
+        if(parammodel.getName().indexOf("橱柜台面")==-1){
+            // 且有水槽柜，有粘盆费
+            if($zpf.getValue()!=null && $zpf.getValue().equals("1")){
+                // _result.getList().add(createParamModelResult("台面测试:", $m));
+                flag2 = true;
+            }
+        }
+        
+    }
+    // 没橱柜台面，并且有水槽柜粘盆费
+    if(flag == false && flag2 == true){
+        _result.getList().add(createParamModelResult("如果选择了粘盆费，请正确的生成台面！！", $m));
+    }
+    // 有橱柜台面，并且没有水槽柜粘盆费
+    if(flag == true && flag2 == false){
+        _result.getList().add(createParamModelResult("如果生成了台面，必须在【水槽柜】选择粘盆费！！！", $m));
+    }
+    
+end

@@ -1,0 +1,101 @@
+rule "掩门门铰边跨区域必须选无引孔"
+when
+// 获得而所有门铰组左边的侧板和自由中竖板
+    // $m: FParamModel(brandGood.transProdCatId == 713 && name.indexOf("门铰组") != -1)
+    // $m: FParamModel(name.indexOf("门") != -1)
+    // $mk: FParameter(name == "MJDZ") from $m.getAllParameter()
+    $list: List() from collect(FParamModel(brandGood.transProdCatId == 713 && name.indexOf("门铰组") != -1))
+    eval($list.size()>1)
+then
+    List<FParamModel> newList = new ArrayList();
+    boolean flag = false;
+    for(Object parammodel: $list){
+        ObjectMapper objectMapper = new ObjectMapper();
+        FParamModel newParammodel = objectMapper.convertValue(parammodel, FParamModel.class);
+        for (FParameter param: newParammodel.getAllParameter()) {
+            newList.add(newParammodel);
+        }
+    }
+    
+    //  遍历newList数组，看每一个门铰组左边有无侧板
+    for (FParamModel parammodel: newList) {
+        String id = "abc";
+        boolean isFrist = true;
+        // _result.getList().add(createParamModelResult("测试："+parammodel.getName(),parammodel));
+        // 找门铰组左边的模型
+        for(FCustomModel paramModelLeft: findModel(parammodel, BaseDirect.X_NEGATIVE, _modelTree)){
+            // 只看侧板和中竖板
+            if(paramModelLeft.getBrandGood().getBrandGoodName()!=null && paramModelLeft.getBrandGood().getBrandGoodName().contains("侧板") || paramModelLeft.getBrandGood().getBrandGoodName().contains("中竖板")){
+                // _result.getList().add(createParamModelResult("门铰左边有这些侧板:"+parammodel.getId(), paramModelLeft));
+                // 判断哪些侧板是左开门的
+                if(rangeMinLimitDistance(paramModelLeft, parammodel, BaseDirect.Z_POSITIVE,BaseDirect.X_POSITIVE)>0 && rangeMinLimitDistance(paramModelLeft, parammodel, BaseDirect.Z_POSITIVE,BaseDirect.X_POSITIVE)<20){
+                    
+                    if(isFrist == true){
+                        isFrist = false;
+                    }
+                    // 如果门铰id和上一次循环一样，并且不是第一次循环，进入掩门引孔判断
+                    if(id == parammodel.getId() && isFrist == false){
+                        // _result.getList().add(createParamModelResult("侧板:"+parammodel.getId(), paramModelLeft));
+                        // 找门铰组前面的门板
+                        for(FCustomModel mJz: findModel(parammodel, BaseDirect.Y_NEGATIVE, _modelTree)){
+                            if(mJz.getBrandGood().getBrandGoodName()!=null mJz.getBrandGood().getBrandGoodName().contains("门")){
+                                // _result.getList().add(createParamModelResult("门铰组前面的门板", mJz));
+                                for (FParameter door: mJz.getAllParameter()) {
+                                    // 如果这个门的侧板引孔选择有，则报错，提示跨区域选无引孔 && door.getValue().equals("1")
+                                    // if(door.getName().equals("MJDZ")){
+                                    //     _result.getList().add(createParamModelResult("跨区域门板必须选无引孔！！！", mJz));
+                                    // }
+                                    // door.getValue()无法获取公式变量，暂停
+                                    _result.getList().add(createParamModelResult("门铰组前面的门板变量："+door.getName() + door.getValue(), mJz));
+                                }
+                            }
+                        }
+                        
+                    }
+                    // 保存侧板对应的门铰id
+                    id = parammodel.getId();
+                    // _result.getList().add(createParamModelResult("侧板:"+parammodel.getId(), paramModelLeft));
+                }
+            }
+        }
+    }
+
+    // // 找门铰组左边的模型
+    // for(FCustomModel paramModel: findModel($m, BaseDirect.X_NEGATIVE, _modelTree)){
+    //     // _result.getList().add(createParamModelResult("门铰左边所有板件", paramModel));
+    //     // 只看侧板和中竖板
+    //     if(paramModel.getBrandGood().getBrandGoodName().contains("侧板") || paramModel.getBrandGood().getBrandGoodName().contains("中竖板")){
+    //         // _result.getList().add(createParamModelResult("侧板:", paramModel));
+    //         // _result.getList().add(createParamModelResult("X轴方向最大值:"+ rangeMaxLimitDistance($m, paramModel, BaseDirect.Z_POSITIVE,BaseDirect.X_POSITIVE), paramModel));
+    //         // _result.getList().add(createParamModelResult("X轴方向最小值::"+ rangeMinLimitDistance($m, paramModel, BaseDirect.Z_POSITIVE,BaseDirect.X_POSITIVE), paramModel));
+    //         // 门铰组合侧板之间范围必须在0到20之间，获得门铰边的侧板
+    //         if(rangeMinLimitDistance($m, paramModel, BaseDirect.Z_POSITIVE,BaseDirect.X_POSITIVE)>0 && rangeMinLimitDistance($m, paramModel, BaseDirect.Z_POSITIVE,BaseDirect.X_POSITIVE)<20){
+    //             // _result.getList().add(createParamModelResult("X轴方向最小值:"+ existModel(paramModel, BaseDirect.Z_POSITIVE, _modelTree)+ rangeMinLimitDistance($m, paramModel, BaseDirect.Z_POSITIVE,BaseDirect.X_POSITIVE), paramModel));
+    //             // 在所有门边的侧板里，检查侧板上面还有没有侧板，如果有。报错
+    //             // if(existModel(paramModel, BaseDirect.Z_POSITIVE, _modelTree)){
+    //             //     _result.getList().add(createParamModelResult("门板跨区域"+ existModel(paramModel, BaseDirect.Z_POSITIVE, _modelTree), paramModel));
+    //             // }
+    //             // 如果门铰边的侧板上方的板件大于1块。
+    //             if(findModel(paramModel, BaseDirect.Z_POSITIVE, _modelTree).size()>0){
+    //                 _result.getList().add(createParamModelResult("paramModel："+ paramModel.getId(), paramModel));
+    //             }
+    //         }
+    //     }
+    // }
+    
+    // int i = 0;
+    // // 查看每个门板背后是否有2块相同的侧板。如2块左侧板
+    // for(FCustomModel paramModel: findModel($m, BaseDirect.Y_POSITIVE, _modelTree)){
+    //     // _result.getList().add(createParamModelResult("所有门后方的组件", paramModel));
+    //     if(paramModel.getBrandGood().getBrandGoodName().contains("侧板") || paramModel.getBrandGood().getBrandGoodName().contains("中竖板")){
+    //         // _result.getList().add(createParamModelResult("侧板:", paramModel));
+    //         _result.getList().add(createParamModelResult("X轴方向最大值:"+ rangeMaxLimitDistance($m, paramModel, BaseDirect.Z_POSITIVE,BaseDirect.X_POSITIVE), paramModel));
+    //         _result.getList().add(createParamModelResult("X轴方向最小值::"+ rangeMinLimitDistance($m, paramModel, BaseDirect.Z_POSITIVE,BaseDirect.X_POSITIVE), paramModel));
+    //         // if(rangeMaxLimitDistance($m, paramModel, BaseDirect.Z_POSITIVE,BaseDirect.X_POSITIVE)>0 && rangeMaxLimitDistance($m, paramModel, BaseDirect.Z_POSITIVE,BaseDirect.X_POSITIVE)<18
+    //         // || 
+    //         // rangeMinLimitDistance($m, paramModel, BaseDirect.Z_POSITIVE,BaseDirect.X_POSITIVE)<2){
+    //         //     _result.getList().add(createParamModelResult("侧板:"+paramModel.getName(), paramModel));
+    //         // }
+    //     }
+    // }
+end

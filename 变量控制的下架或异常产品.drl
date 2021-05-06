@@ -1,0 +1,87 @@
+rule "抽屉下架反弹导轨"
+when
+    $m1 : FParamModel(brandGood.transProdCatId!=null && brandGood.transProdCatId == 1043)
+    eval(matchExpression("@A.DGKS=='3'", $m1))
+then
+    _result.getList().add(createParamModelResult("抽屉导轨为反弹导轨！该产品已下架！！", $m1));
+end
+
+rule "新派玻璃抽下盖不能大于18"
+when
+    $m1 : FParamModel(brandGood.transProdCatId!=null && brandGood.transProdCatId == 498)
+    eval(matchExpression("@A.CM_FG==6", $m1)) && eval(matchExpression("@A.dCover>18", $m1))
+then
+    _result.getList().add(createParamModelResult("新派玻璃抽下盖值不能大于18！！", $m1));
+end
+
+rule "ML-5抽屉不能做暗拉手"
+when
+    $m1 : FParamModel(brandGood.transProdCatId!=null && brandGood.transProdCatId == 498)
+    eval(matchExpression("@A.LSXH=='M-1拉手'", $m1)) && eval(matchExpression("@A.CM_FG==39", $m1))
+then
+    _result.getList().add(createParamModelResult("ML-5抽屉不能做暗拉手！！", $m1));
+end
+
+rule "裤架不能做反弹导轨"
+when
+    $m1 : FParamModel(brandGood.transProdCatId!=null && brandGood.transProdCatId == 1043)
+    eval(matchExpression("@A.DG_LX==3", $m1))
+then
+    _result.getList().add(createParamModelResult("裤架导轨为反弹导轨！该产品已下架！！", $m1));
+end
+
+rule "不符合工艺的掩门"
+when
+    $m1 : FParamModel(brandGood.transProdCatId!=null && brandGood.transProdCatId == 498)
+    eval(matchExpression("@A.coverType==0", $m1))
+then
+    for (FParameter param: $m1.getAllParameter()){      
+        // QM-5A门不能做内嵌
+        if(param.getName().equals("MB_FG") && param.getParsedValue(Integer.class)==177){
+            _result.getList().add(createParamModelResult("QM-5A门不能做内嵌！！！", $m1));
+        }
+        // QM-5B门不能做内嵌
+        if(param.getName().equals("MB_FG") && param.getParsedValue(Integer.class)==178){
+            _result.getList().add(createParamModelResult("QM-5B门不能做内嵌！！！", $m1));
+        }
+        // JJ-05门，不能做内嵌
+        if(param.getName().equals("MB_FG") && 
+        (param.getParsedValue(Integer.class)==208 || param.getParsedValue(Integer.class)==209 || param.getParsedValue(Integer.class)==210 || param.getParsedValue(Integer.class)==211 || param.getParsedValue(Integer.class)==212)){
+            _result.getList().add(createParamModelResult("JJ-05门门不能做内嵌！！！", $m1));
+        }
+    }
+end
+
+rule "儿童床护栏01下架"
+when
+    $m1 : FParamModel(brandGood.brandGoodCode!=null && brandGood.brandGoodCode == "CHL01")
+then
+    _result.getList().add(createParamModelResult("儿童床护栏01已下架！！", $m1));
+end
+
+rule "V型抽上盖只能做内嵌"
+when
+    $m1 : FParamModel(brandGood.transProdCatId!=null && brandGood.transProdCatId == 498)
+    eval(matchExpression("@A.CM_FG==17", $m1)) && eval(matchExpression("@A.uCover!=0", $m1))
+then
+    _result.getList().add(createParamModelResult("V型抽上盖只能做内嵌！！", $m1));
+end
+
+rule "床箱7的1.8床架下架"
+when
+    $m1 : FParamModel(brandGood.brandGoodCode!=null && brandGood.brandGoodCode == "CX7")
+then
+    _result.getList().add(createParamModelResult("床箱7的1.8床架下架！！", $m1));
+end
+
+rule "圆弧门只能使用165度大曲门铰"
+when
+    $m1 : FParamModel(brandGood.transProdCatId!=null && brandGood.transProdCatId == 498)
+    $p1: FParameter(name == "MB_FG") from $m1.getAllParameter()
+    $p2: FParameter(name == "MJKS") from $m1.getAllParameter()
+then
+    if($p1.getParsedValue(Integer.class)==197 && $p2.getParsedValue(Integer.class)!=4 && $p2.getParsedValue(Integer.class)!=0){
+
+        _result.getList().add(createParamModelResult("圆弧门只能使用165度大曲门铰！！", $m1));
+    }
+end
