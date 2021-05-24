@@ -44,7 +44,7 @@ then
                             rangeMinLimitDistance(paramModelLeft, parammodel, BaseDirect.Z_POSITIVE,BaseDirect.X_POSITIVE)< 41
                             
                             ){
-                                _result.getList().add(createParamModelResult("左掩门盖法与实际不匹配，请调整掩门的[门铰边盖值]"+rangeMinLimitDistance(paramModelLeft, parammodel, BaseDirect.Z_POSITIVE,BaseDirect.X_POSITIVE)+"板："+Float.parseFloat(ban.getValue()), paramModelLeft));
+                                _result.getList().add(createParamModelResult("左掩门盖法与实际不匹配，请调整掩门的[门铰边盖值]"+rangeMinLimitDistance(paramModelLeft, parammodel, BaseDirect.Z_POSITIVE,BaseDirect.X_POSITIVE)+"板厚："+Float.parseFloat(ban.getValue()), paramModelLeft));
                                 // _result.getList().add(createParamModelResult("左掩门盖法与实际不匹配，请调整掩门的[门铰边盖值]"+ban.getValue(), parammodel));
                                 return;
                             }

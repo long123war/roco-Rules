@@ -1,0 +1,65 @@
+rule "拉手05颜色必须一致"
+when
+    // 获得复核条件的数组对象
+    $list: List() from collect(FParamModel(brandGood.brandGoodName!=null && (brandGood.brandGoodName.indexOf("拉手05") != -1 && brandGood.transProdCatId == 713)))
+    // eval("表达式")返回boolean
+    eval($list.size()>1)
+then
+    // _result.getList().add(createParamModelResult("在整个方案中柜身板材不可同时存在清新板和颗粒板，请把所有柜身修改为统一材质！",parammodel));
+    // 创建一个newList数组。
+    List<FParamModel> newList = new ArrayList();
+    // 遍历$list数组对象，数组里面每个元素是parammodel
+    boolean isfirst = true;
+    String str = "";
+    for(Object parammodel: $list){
+        // 创建FParamModel类型开始
+        ObjectMapper objectMapper = new ObjectMapper();
+        // 如果是第一次循环
+        // if(isfirst == true){
+        //     // 把isfirst设置为false
+        //     isfirst = false;
+        //     FParamModel newParammodel = objectMapper.convertValue(parammodel, FParamModel.class);
+        //     // 创建FParamModel类型结束，得到newParammodel对象
+        //     // 遍历newParammodel对象里的所有变量。
+        //     // 过滤复核目标的对象
+        //     for (FParameter param: newParammodel.getAllParameter()) {
+        //         if (param.getName().equals("YS")) {
+        //             _result.getList().add(createParamModelResult("材质打印:"+param.getParsedValue(String.class),parammodel));
+        //         }
+        //         newList.add(newParammodel);
+        //     }
+        // }
+
+        FParamModel newParammodel = objectMapper.convertValue(parammodel, FParamModel.class);
+        // 创建FParamModel类型结束，得到newParammodel对象
+        // 遍历newParammodel对象里的所有变量。
+        // 过滤复核目标的对象
+        for (FParameter param: newParammodel.getAllParameter()) {
+            
+            newList.add(newParammodel);
+        }
+    }
+
+    // 获得最终目标数组newList
+    for (FParamModel parammodel: newList) {
+        // _result.getList().add(createParamModelResult("拉手05:"+parammodel.getName()+parammodel.getBrandGood().getDescription().substring(0, 2).equals("03"),parammodel));
+        // 如果描述字段前2位是03才执行逻辑
+        if(parammodel.getBrandGood().getDescription().substring(0, 2).equals("03")){
+            // 如果是第一次循环
+            if(isfirst == true){
+                // 把isfirst设置为false
+                isfirst = false;
+                str = parammodel.getName();
+                continue;
+            }
+            // _result.getList().add(createParamModelResult("拉手判断"+str.equals(parammodel.getName()),parammodel));
+            if(str.equals(parammodel.getName())){
+
+            }else{
+                _result.getList().add(createParamModelResult("拉手"+parammodel.getName()+"与其他拉手颜色不同，请选择一样的颜色！！",parammodel));
+                return;
+            }
+        }
+        
+    }
+end
